@@ -1,0 +1,39 @@
+from django.db import models
+from apps.master_data.models import Mahasiswa, Dosen, Laboratorium, Kunci
+
+
+class Peminjaman(models.Model):
+    STATUS_CHOICES = [
+        ('Dipinjam', 'Dipinjam'),
+        ('Dikembalikan', 'Dikembalikan'),
+    ]
+
+    mahasiswa = models.ForeignKey(
+        Mahasiswa, on_delete=models.CASCADE, related_name='peminjaman'
+    )
+    dosen = models.ForeignKey(
+        Dosen, on_delete=models.CASCADE, related_name='peminjaman'
+    )
+    laboratorium = models.ForeignKey(
+        Laboratorium, on_delete=models.CASCADE, related_name='peminjaman'
+    )
+    kunci = models.ForeignKey(
+        Kunci, on_delete=models.CASCADE, related_name='peminjaman'
+    )
+    tanggal_pinjam = models.DateField(auto_now_add=True)
+    jam_pinjam = models.TimeField()
+    tanggal_kembali = models.DateField(null=True, blank=True)
+    jam_kembali = models.TimeField(null=True, blank=True)
+    keperluan = models.TextField()
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='Dipinjam'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Peminjaman"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.mahasiswa.nama} - {self.kunci} ({self.tanggal_pinjam})"

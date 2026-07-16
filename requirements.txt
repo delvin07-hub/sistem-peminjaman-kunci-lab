@@ -1,0 +1,5 @@
+django>=6.0,<7.0
+mysqlclient>=2.2
+python-dotenv>=1.0
+django-filter>=26.1
+django-widget-tweaks>=1.5

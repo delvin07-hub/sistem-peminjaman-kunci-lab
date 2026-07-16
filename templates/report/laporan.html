@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Laporan Peminjaman{% endblock %}
+
+{% block content %}
+<h4><i class="bi bi-file-text"></i> Laporan Peminjaman</h4>
+
+<div class="card shadow mb-3">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card text-bg-info text-center p-2">
+                    <h3>{{ total }}</h3>
+                    <small>Total Transaksi</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-bg-warning text-center p-2">
+                    <h3>{{ dipinjam }}</h3>
+                    <small>Dipinjam</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-bg-success text-center p-2">
+                    <h3>{{ dikembalikan }}</h3>
+                    <small>Dikembalikan</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <form method="get" class="row g-2 mb-3">
+            <div class="col-md-3">
+                <label class="form-label">Tanggal Awal</label>
+                <input type="date" name="tgl_awal" class="form-control" value="{{ tgl_awal }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tanggal Akhir</label>
+                <input type="date" name="tgl_akhir" class="form-control" value="{{ tgl_akhir }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">-- Semua --</option>
+                    <option value="Dipinjam" {% if status_filter == 'Dipinjam' %}selected{% endif %}>Dipinjam</option>
+                    <option value="Dikembalikan" {% if status_filter == 'Dikembalikan' %}selected{% endif %}>Dikembalikan</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-filter"></i> Filter</button>
+                <a href="{% url 'report_index' %}" class="btn btn-secondary ms-2">Reset</a>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-sm" id="table-laporan">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tgl Pinjam</th>
+                        <th>Mahasiswa</th>
+                        <th>NIM</th>
+                        <th>Dosen</th>
+                        <th>Lab</th>
+                        <th>Kunci</th>
+                        <th>Jam Pinjam</th>
+                        <th>Jam Kembali</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in data %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ p.tanggal_pinjam|date:'d/m/Y' }}</td>
+                        <td>{{ p.mahasiswa.nama }}</td>
+                        <td>{{ p.mahasiswa.nim }}</td>
+                        <td>{{ p.dosen.nama }}</td>
+                        <td>{{ p.laboratorium.kode_lab }}</td>
+                        <td>{{ p.kunci.nomor_kunci }}</td>
+                        <td>{{ p.jam_pinjam }}</td>
+                        <td>{{ p.jam_kembali|default:'-' }}</td>
+                        <td>
+                            {% if p.status == 'Dipinjam' %}
+                            <span class="badge bg-warning text-dark">Dipinjam</span>
+                            {% else %}
+                            <span class="badge bg-success">Dikembalikan</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="10" class="text-center">Tidak ada data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

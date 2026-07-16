@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Data Mahasiswa{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="bi bi-people-fill"></i> Data Mahasiswa</h4>
+    <a href="{% url 'mahasiswa_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Tambah Mahasiswa
+    </a>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <form method="get" class="mb-3">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Cari NIM atau Nama..." value="{{ request.GET.search }}">
+                <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
+                {% if request.GET.search %}
+                <a href="{% url 'mahasiswa_list' %}" class="btn btn-outline-secondary">Reset</a>
+                {% endif %}
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>NIM</th>
+                        <th>Nama</th>
+                        <th>Program Studi</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in data %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ m.nim }}</td>
+                        <td>{{ m.nama }}</td>
+                        <td>{{ m.program_studi }}</td>
+                        <td>
+                            <a href="{% url 'mahasiswa_update' m.id %}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'mahasiswa_delete' m.id %}" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center">Tidak ada data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_paginated %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Awal</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Prev</a></li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Akhir</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

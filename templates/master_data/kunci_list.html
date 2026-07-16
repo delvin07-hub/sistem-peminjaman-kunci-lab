@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Data Kunci{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="bi bi-key-fill"></i> Data Kunci</h4>
+    <a href="{% url 'kunci_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Tambah Kunci
+    </a>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <form method="get" class="row g-2 mb-3">
+            <div class="col-md-4">
+                <select name="lab" class="form-select">
+                    <option value="">-- Semua Lab --</option>
+                    {% for lab in lab_list %}
+                    <option value="{{ lab.id }}" {% if request.GET.lab == lab.id|stringformat:'s' %}selected{% endif %}>{{ lab.kode_lab }} - {{ lab.nama_lab }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Cari nomor kunci..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-outline-primary" type="submit"><i class="bi bi-filter"></i> Filter</button>
+                <a href="{% url 'kunci_list' %}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nomor Kunci</th>
+                        <th>Laboratorium</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for k in data %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ k.nomor_kunci }}</td>
+                        <td>{{ k.laboratorium.kode_lab }} - {{ k.laboratorium.nama_lab }}</td>
+                        <td>
+                            {% if k.status == 'Tersedia' %}
+                            <span class="badge bg-success">Tersedia</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Dipinjam</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'kunci_update' k.id %}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'kunci_delete' k.id %}" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center">Tidak ada data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Konfirmasi Hapus{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Konfirmasi Hapus</h5>
+            </div>
+            <div class="card-body">
+                <p>Apakah Anda yakin ingin menghapus data berikut?</p>
+                <p class="fw-bold">{{ object }}</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="javascript:history.back()" class="btn btn-secondary">Batal</a>
+                        <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
