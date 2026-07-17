@@ -3,3 +3,4 @@ mysqlclient>=2.2
 python-dotenv>=1.0
 django-filter>=26.1
 django-widget-tweaks>=1.5
+openpyxl>=3.1

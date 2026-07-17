@@ -7,19 +7,19 @@
 <div class="card shadow mb-3">
     <div class="card-body">
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card text-bg-info text-center p-2">
                     <h3>{{ total }}</h3>
                     <small>Total Transaksi</small>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card text-bg-warning text-center p-2">
                     <h3>{{ dipinjam }}</h3>
                     <small>Dipinjam</small>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card text-bg-success text-center p-2">
                     <h3>{{ dikembalikan }}</h3>
                     <small>Dikembalikan</small>
@@ -49,10 +49,22 @@
                 </select>
             </div>
             <div class="col-md-3 d-flex align-items-end">
-                <button class="btn btn-primary" type="submit"><i class="bi bi-filter"></i> Filter</button>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Tampilkan</button>
                 <a href="{% url 'report_index' %}" class="btn btn-secondary ms-2">Reset</a>
             </div>
         </form>
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted">Menampilkan {{ data|length }} transaksi</span>
+            <div>
+                <a href="{% url 'report_export_excel' %}?{% if tgl_awal %}tgl_awal={{ tgl_awal }}&{% endif %}{% if tgl_akhir %}tgl_akhir={{ tgl_akhir }}&{% endif %}{% if status_filter %}status={{ status_filter }}{% endif %}" class="btn btn-success btn-sm">
+                    <i class="bi bi-file-earmark-excel"></i> Export Excel
+                </a>
+                <a href="{% url 'report_export_csv' %}?{% if tgl_awal %}tgl_awal={{ tgl_awal }}&{% endif %}{% if tgl_akhir %}tgl_akhir={{ tgl_akhir }}&{% endif %}{% if status_filter %}status={{ status_filter }}{% endif %}" class="btn btn-secondary btn-sm">
+                    <i class="bi bi-file-earmark-text"></i> Export CSV
+                </a>
+            </div>
+        </div>
 
         <div class="table-responsive">
             <table class="table table-hover table-sm" id="table-laporan">
@@ -80,8 +92,8 @@
                         <td>{{ p.dosen.nama }}</td>
                         <td>{{ p.laboratorium.kode_lab }}</td>
                         <td>{{ p.kunci.nomor_kunci }}</td>
-                        <td>{{ p.jam_pinjam }}</td>
-                        <td>{{ p.jam_kembali|default:'-' }}</td>
+                        <td>{{ p.jam_pinjam|time:'H:i' }}</td>
+                        <td>{{ p.jam_kembali|time:'H:i'|default:'-' }}</td>
                         <td>
                             {% if p.status == 'Dipinjam' %}
                             <span class="badge bg-warning text-dark">Dipinjam</span>
