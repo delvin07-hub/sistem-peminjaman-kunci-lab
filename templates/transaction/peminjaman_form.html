@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static widget_tweaks %}
 {% block title %}Peminjaman Kunci{% endblock %}
 
 {% block content %}
@@ -16,17 +16,12 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Mahasiswa</label>
-                            <select name="mahasiswa" class="form-select" id="id_mahasiswa" required>
-                                <option value="">-- Pilih Mahasiswa --</option>
-                                {% for m in form.fields.mahasiswa.queryset %}
-                                <option value="{{ m.id }}" {% if form.mahasiswa.value == m.id %}selected{% endif %}>{{ m.nama }} ({{ m.nim }})</option>
-                                {% endfor %}
-                            </select>
+                            {{ form.mahasiswa|add_class:"form-select" }}
                             {% if form.mahasiswa.errors %}<div class="text-danger small">{{ form.mahasiswa.errors.0 }}</div>{% endif %}
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Dosen</label>
-                            {{ form.dosen }}
+                            {{ form.dosen|add_class:"form-select" }}
                             {% if form.dosen.errors %}<div class="text-danger small">{{ form.dosen.errors.0 }}</div>{% endif %}
                         </div>
                     </div>
@@ -34,19 +29,12 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Laboratorium</label>
-                            <select name="laboratorium" class="form-select" id="id_laboratorium" required>
-                                <option value="">-- Pilih Lab --</option>
-                                {% for lab in form.fields.laboratorium.queryset %}
-                                <option value="{{ lab.id }}">{{ lab.kode_lab }} - {{ lab.nama_lab }}</option>
-                                {% endfor %}
-                            </select>
+                            {{ form.laboratorium|add_class:"form-select" }}
                             {% if form.laboratorium.errors %}<div class="text-danger small">{{ form.laboratorium.errors.0 }}</div>{% endif %}
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Kunci</label>
-                            <select name="kunci" class="form-select" id="id_kunci" required>
-                                <option value="">-- Pilih Lab terlebih dahulu --</option>
-                            </select>
+                            {{ form.kunci|add_class:"form-select" }}
                             {% if form.kunci.errors %}<div class="text-danger small">{{ form.kunci.errors.0 }}</div>{% endif %}
                         </div>
                     </div>
@@ -54,12 +42,12 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Jam Pinjam</label>
-                            {{ form.jam_pinjam }}
+                            {{ form.jam_pinjam|add_class:"form-control" }}
                             {% if form.jam_pinjam.errors %}<div class="text-danger small">{{ form.jam_pinjam.errors.0 }}</div>{% endif %}
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Keperluan</label>
-                            {{ form.keperluan }}
+                            {{ form.keperluan|add_class:"form-control" }}
                             {% if form.keperluan.errors %}<div class="text-danger small">{{ form.keperluan.errors.0 }}</div>{% endif %}
                         </div>
                     </div>
@@ -84,15 +72,13 @@ $(document).ready(function() {
     $('#id_laboratorium').on('change', function() {
         var labId = $(this).val();
         var $kunci = $('#id_kunci');
+        $kunci.empty().append('<option value="">-- Pilih Kunci --</option>');
         if (labId) {
             $.getJSON('/transaksi/api/get-kunci/', { lab_id: labId }, function(data) {
-                $kunci.empty().append('<option value="">-- Pilih Kunci --</option>');
                 $.each(data.results, function(i, item) {
                     $kunci.append('<option value="' + item.id + '">' + item.text + '</option>');
                 });
             });
-        } else {
-            $kunci.empty().append('<option value="">-- Pilih Lab terlebih dahulu --</option>');
         }
     });
 });

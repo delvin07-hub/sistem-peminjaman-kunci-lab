@@ -41,6 +41,11 @@ class MahasiswaDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('mahasiswa_list')
     template_name = 'master_data/confirm_delete.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse_lazy('mahasiswa_list')
+        return context
+
 
 class DosenListView(LoginRequiredMixin, ListView):
     model = Dosen
@@ -77,6 +82,11 @@ class DosenDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('dosen_list')
     template_name = 'master_data/confirm_delete.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse_lazy('dosen_list')
+        return context
+
 
 class LaboratoriumListView(LoginRequiredMixin, ListView):
     model = Laboratorium
@@ -112,6 +122,11 @@ class LaboratoriumDeleteView(LoginRequiredMixin, DeleteView):
     model = Laboratorium
     success_url = reverse_lazy('laboratorium_list')
     template_name = 'master_data/confirm_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse_lazy('laboratorium_list')
+        return context
 
 
 class KunciListView(LoginRequiredMixin, ListView):
@@ -154,3 +169,8 @@ class KunciDeleteView(LoginRequiredMixin, DeleteView):
     model = Kunci
     success_url = reverse_lazy('kunci_list')
     template_name = 'master_data/confirm_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse_lazy('kunci_list')
+        return context

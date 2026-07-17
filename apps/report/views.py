@@ -1,12 +1,23 @@
 import csv
+from datetime import timedelta
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.db.models import Q
+from django.core.paginator import Paginator
+from django.utils import timezone
 from apps.transaction.models import Peminjaman
 
 
+def _cleanup_old_records():
+    cutoff = timezone.now().date() - timedelta(days=30)
+    Peminjaman.objects.filter(
+        tanggal_pinjam__lt=cutoff, status='Dikembalikan'
+    ).delete()
+
+
 def _get_filtered_data(request):
+    _cleanup_old_records()
+
     peminjaman = Peminjaman.objects.select_related(
         'mahasiswa', 'kunci', 'laboratorium', 'dosen'
     ).all()
@@ -33,8 +44,12 @@ def laporan_view(request):
     dipinjam = peminjaman.filter(status='Dipinjam').count()
     dikembalikan = peminjaman.filter(status='Dikembalikan').count()
 
+    paginator = Paginator(peminjaman, 50)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'data': peminjaman[:100],
+        'page_obj': page_obj,
         'total': total,
         'dipinjam': dipinjam,
         'dikembalikan': dikembalikan,
@@ -117,7 +132,7 @@ def export_excel(request):
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response['Content-Disposition'] = f'attachment; filename="laporan_peminjaman_{__import__("datetime").date.today()}.xlsx"'
+    response['Content-Disposition'] = f'attachment; filename="laporan_peminjaman_{timezone.now().date()}.xlsx"'
     wb.save(response)
     return response
 
@@ -127,7 +142,7 @@ def export_csv(request):
     peminjaman, _, _, _ = _get_filtered_data(request)
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="laporan_peminjaman_{__import__("datetime").date.today()}.csv"'
+    response['Content-Disposition'] = f'attachment; filename="laporan_peminjaman_{timezone.now().date()}.csv"'
 
     writer = csv.writer(response)
     writer.writerow([
