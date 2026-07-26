@@ -13,7 +13,7 @@
     <div class="card-body">
         <form method="get" class="mb-3">
             <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Cari NIP atau Nama..." value="{{ request.GET.search }}">
+                <input type="text" name="search" class="form-control" placeholder="Cari NIDN atau Nama..." value="{{ request.GET.search }}">
                 <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
                 {% if request.GET.search %}
                 <a href="{% url 'dosen_list' %}" class="btn btn-outline-secondary">Reset</a>
@@ -25,7 +25,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>NIP</th>
+                        <th>NIDN</th>
                         <th>Nama</th>
                         <th>Aksi</th>
                     </tr>
@@ -34,7 +34,7 @@
                     {% for d in data %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ d.nip }}</td>
+                        <td>{{ d.nidn }}</td>
                         <td>{{ d.nama }}</td>
                         <td>
                             <a href="{% url 'dosen_update' d.id %}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>

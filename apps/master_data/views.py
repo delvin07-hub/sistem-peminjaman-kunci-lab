@@ -58,7 +58,7 @@ class DosenListView(LoginRequiredMixin, ListView):
         search = self.request.GET.get('search')
         if search:
             qs = qs.filter(
-                Q(nama__icontains=search) | Q(nip__icontains=search)
+                Q(nama__icontains=search) | Q(nidn__icontains=search)
             )
         return qs
 

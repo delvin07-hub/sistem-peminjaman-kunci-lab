@@ -10,8 +10,8 @@ class MahasiswaAdmin(admin.ModelAdmin):
 
 @admin.register(Dosen)
 class DosenAdmin(admin.ModelAdmin):
-    list_display = ['nip', 'nama']
-    search_fields = ['nip', 'nama']
+    list_display = ['nidn', 'nama']
+    search_fields = ['nidn', 'nama']
 
 
 @admin.register(Laboratorium)

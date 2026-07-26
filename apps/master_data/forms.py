@@ -16,9 +16,9 @@ class MahasiswaForm(forms.ModelForm):
 class DosenForm(forms.ModelForm):
     class Meta:
         model = Dosen
-        fields = ['nip', 'nama']
+        fields = ['nidn', 'nama']
         widgets = {
-            'nip': forms.TextInput(attrs={'class': 'form-control'}),
+            'nidn': forms.TextInput(attrs={'class': 'form-control'}),
             'nama': forms.TextInput(attrs={'class': 'form-control'}),
         }
 

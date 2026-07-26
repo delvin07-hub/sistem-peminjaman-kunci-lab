@@ -53,8 +53,8 @@ class Command(BaseCommand):
             ('198004042010041004', 'Dewi Sartika, S.T., M.T.'),
             ('198005052010051005', 'Prof. Dr. Hendra Gunawan, M.Sc.'),
         ]
-        for nip, nama in data:
-            Dosen.objects.get_or_create(nip=nip, defaults={'nama': nama})
+        for nidn, nama in data:
+            Dosen.objects.get_or_create(nidn=nidn, defaults={'nama': nama})
         self.stdout.write(f'  [OK] {len(data)} dosen')
 
     def _create_laboratorium(self):

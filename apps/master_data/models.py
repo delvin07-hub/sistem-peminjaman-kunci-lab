@@ -17,7 +17,7 @@ class Mahasiswa(models.Model):
 
 
 class Dosen(models.Model):
-    nip = models.CharField(max_length=30, unique=True)
+    nidn = models.CharField(max_length=30, unique=True, verbose_name='NIDN')
     nama = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -27,7 +27,7 @@ class Dosen(models.Model):
         ordering = ['nama']
 
     def __str__(self):
-        return f"{self.nama} ({self.nip})"
+        return f"{self.nama} ({self.nidn})"
 
 
 class Laboratorium(models.Model):
