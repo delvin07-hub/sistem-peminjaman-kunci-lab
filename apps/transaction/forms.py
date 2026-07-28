@@ -1,6 +1,6 @@
 from django import forms
 from .models import Peminjaman
-from apps.master_data.models import Kunci, Mahasiswa, Dosen, Laboratorium
+from apps.master_data.models import Kunci
 
 
 class PeminjamanForm(forms.ModelForm):
@@ -8,17 +8,18 @@ class PeminjamanForm(forms.ModelForm):
         model = Peminjaman
         fields = ['mahasiswa', 'dosen', 'laboratorium', 'kunci', 'jam_pinjam', 'keperluan']
         widgets = {
-            'mahasiswa': forms.Select(attrs={'class': 'form-select', 'id': 'id_mahasiswa'}),
-            'dosen': forms.Select(attrs={'class': 'form-select'}),
-            'laboratorium': forms.Select(attrs={'class': 'form-select', 'id': 'id_laboratorium'}),
-            'kunci': forms.Select(attrs={'class': 'form-select'}),
-            'jam_pinjam': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'keperluan': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'jam_pinjam': forms.TimeInput(attrs={'type': 'time'}),
+            'keperluan': forms.Textarea(attrs={'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['kunci'].queryset = Kunci.objects.filter(status='Tersedia')
+        # Auto-apply Bootstrap classes
+        for name, field in self.fields.items():
+            widget = field.widget
+            css = 'form-select' if isinstance(widget, forms.Select) else 'form-control'
+            widget.attrs.setdefault('class', css)
 
     def clean_kunci(self):
         kunci = self.cleaned_data['kunci']

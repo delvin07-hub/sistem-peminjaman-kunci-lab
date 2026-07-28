@@ -1,39 +1,73 @@
 import csv
-from datetime import timedelta
-from django.shortcuts import render
+
+import openpyxl
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from django.core.paginator import Paginator
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.utils import timezone
+
 from apps.transaction.models import Peminjaman
 
+EXPORT_HEADERS = [
+    'No', 'Tanggal Pinjam', 'NIM', 'Nama Mahasiswa',
+    'Program Studi', 'Dosen', 'Lab', 'Nomor Kunci',
+    'Jam Pinjam', 'Tanggal Kembali', 'Jam Kembali', 'Keperluan', 'Status',
+]
 
-def _cleanup_old_records():
-    cutoff = timezone.now().date() - timedelta(days=30)
-    Peminjaman.objects.filter(
-        tanggal_pinjam__lt=cutoff, status='Dikembalikan'
-    ).delete()
+COLUMN_WIDTHS = {
+    'A': 5, 'B': 15, 'C': 15, 'D': 25, 'E': 20, 'F': 25, 'G': 20,
+    'H': 15, 'I': 12, 'J': 15, 'K': 12, 'L': 30, 'M': 15,
+}
 
 
 def _get_filtered_data(request):
-    _cleanup_old_records()
-
-    peminjaman = Peminjaman.objects.select_related(
+    """Return filtered queryset dan parameter filter aktif."""
+    qs = Peminjaman.objects.select_related(
         'mahasiswa', 'kunci', 'laboratorium', 'dosen'
-    ).all()
+    )
 
     tgl_awal = request.GET.get('tgl_awal')
     tgl_akhir = request.GET.get('tgl_akhir')
     status = request.GET.get('status')
 
     if tgl_awal:
-        peminjaman = peminjaman.filter(tanggal_pinjam__gte=tgl_awal)
+        qs = qs.filter(tanggal_pinjam__gte=tgl_awal)
     if tgl_akhir:
-        peminjaman = peminjaman.filter(tanggal_pinjam__lte=tgl_akhir)
+        qs = qs.filter(tanggal_pinjam__lte=tgl_akhir)
     if status:
-        peminjaman = peminjaman.filter(status=status)
+        qs = qs.filter(status=status)
 
-    return peminjaman, tgl_awal, tgl_akhir, status
+    return qs, tgl_awal, tgl_akhir, status
+
+
+def _fmt_date(d):
+    return d.strftime('%d/%m/%Y') if d else '-'
+
+
+def _fmt_time(t):
+    return str(t)[:5] if t else '-'
+
+
+def _peminjaman_to_row(i, p):
+    """Konversi satu record Peminjaman jadi list untuk export."""
+    return [
+        i,
+        _fmt_date(p.tanggal_pinjam),
+        p.mahasiswa.nim,
+        p.mahasiswa.nama,
+        p.mahasiswa.program_studi,
+        p.dosen.nama,
+        f'{p.laboratorium.kode_lab} - {p.laboratorium.nama_lab}',
+        p.kunci.nomor_kunci,
+        _fmt_time(p.jam_pinjam),
+        _fmt_date(p.tanggal_kembali),
+        _fmt_time(p.jam_kembali),
+        p.keperluan,
+        p.status,
+    ]
 
 
 @login_required
@@ -42,17 +76,15 @@ def laporan_view(request):
 
     total = peminjaman.count()
     dipinjam = peminjaman.filter(status='Dipinjam').count()
-    dikembalikan = peminjaman.filter(status='Dikembalikan').count()
 
     paginator = Paginator(peminjaman, 50)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
     context = {
         'page_obj': page_obj,
         'total': total,
         'dipinjam': dipinjam,
-        'dikembalikan': dikembalikan,
+        'dikembalikan': total - dipinjam,
         'tgl_awal': tgl_awal,
         'tgl_akhir': tgl_akhir,
         'status_filter': status,
@@ -64,9 +96,6 @@ def laporan_view(request):
 def export_excel(request):
     peminjaman, _, _, _ = _get_filtered_data(request)
 
-    import openpyxl
-    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
-
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = 'Laporan Peminjaman'
@@ -75,19 +104,11 @@ def export_excel(request):
     header_fill = PatternFill(start_color='0D6EFD', end_color='0D6EFD', fill_type='solid')
     header_align = Alignment(horizontal='center', vertical='center', wrap_text=True)
     thin_border = Border(
-        left=Side(style='thin'),
-        right=Side(style='thin'),
-        top=Side(style='thin'),
-        bottom=Side(style='thin'),
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin'),
     )
 
-    headers = [
-        'No', 'Tanggal Pinjam', 'NIM', 'Nama Mahasiswa',
-        'Program Studi', 'Dosen', 'Lab', 'Nomor Kunci',
-        'Jam Pinjam', 'Tanggal Kembali', 'Jam Kembali', 'Keperluan', 'Status',
-    ]
-
-    for col, header in enumerate(headers, 1):
+    for col, header in enumerate(EXPORT_HEADERS, 1):
         cell = ws.cell(row=1, column=col, value=header)
         cell.font = header_font
         cell.fill = header_fill
@@ -95,39 +116,13 @@ def export_excel(request):
         cell.border = thin_border
 
     for i, p in enumerate(peminjaman, 1):
-        row_data = [
-            i,
-            p.tanggal_pinjam.strftime('%d/%m/%Y') if p.tanggal_pinjam else '-',
-            p.mahasiswa.nim,
-            p.mahasiswa.nama,
-            p.mahasiswa.program_studi,
-            p.dosen.nama,
-            f'{p.laboratorium.kode_lab} - {p.laboratorium.nama_lab}',
-            p.kunci.nomor_kunci,
-            str(p.jam_pinjam)[:5],
-            p.tanggal_kembali.strftime('%d/%m/%Y') if p.tanggal_kembali else '-',
-            str(p.jam_kembali)[:5] if p.jam_kembali else '-',
-            p.keperluan,
-            p.status,
-        ]
-        for col, value in enumerate(row_data, 1):
+        for col, value in enumerate(_peminjaman_to_row(i, p), 1):
             cell = ws.cell(row=i + 1, column=col, value=value)
             cell.border = thin_border
             cell.alignment = Alignment(vertical='center')
 
-    ws.column_dimensions['A'].width = 5
-    ws.column_dimensions['B'].width = 15
-    ws.column_dimensions['C'].width = 15
-    ws.column_dimensions['D'].width = 25
-    ws.column_dimensions['E'].width = 20
-    ws.column_dimensions['F'].width = 25
-    ws.column_dimensions['G'].width = 20
-    ws.column_dimensions['H'].width = 15
-    ws.column_dimensions['I'].width = 12
-    ws.column_dimensions['J'].width = 15
-    ws.column_dimensions['K'].width = 12
-    ws.column_dimensions['L'].width = 30
-    ws.column_dimensions['M'].width = 15
+    for letter, width in COLUMN_WIDTHS.items():
+        ws.column_dimensions[letter].width = width
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -145,27 +140,9 @@ def export_csv(request):
     response['Content-Disposition'] = f'attachment; filename="laporan_peminjaman_{timezone.now().date()}.csv"'
 
     writer = csv.writer(response)
-    writer.writerow([
-        'No', 'Tanggal Pinjam', 'NIM', 'Nama Mahasiswa',
-        'Program Studi', 'Dosen', 'Lab', 'Nomor Kunci',
-        'Jam Pinjam', 'Tanggal Kembali', 'Jam Kembali', 'Keperluan', 'Status',
-    ])
+    writer.writerow(EXPORT_HEADERS)
 
     for i, p in enumerate(peminjaman, 1):
-        writer.writerow([
-            i,
-            p.tanggal_pinjam.strftime('%d/%m/%Y') if p.tanggal_pinjam else '-',
-            p.mahasiswa.nim,
-            p.mahasiswa.nama,
-            p.mahasiswa.program_studi,
-            p.dosen.nama,
-            f'{p.laboratorium.kode_lab} - {p.laboratorium.nama_lab}',
-            p.kunci.nomor_kunci,
-            str(p.jam_pinjam)[:5],
-            p.tanggal_kembali.strftime('%d/%m/%Y') if p.tanggal_kembali else '-',
-            str(p.jam_kembali)[:5] if p.jam_kembali else '-',
-            p.keperluan,
-            p.status,
-        ])
+        writer.writerow(_peminjaman_to_row(i, p))
 
     return response
