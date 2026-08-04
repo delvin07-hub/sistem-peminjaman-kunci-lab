@@ -31,7 +31,7 @@
 
 <div class="card shadow">
     <div class="card-body">
-        <form method="get" class="row g-2 mb-3">
+        <form method="get" hx-get="{% url 'report_index' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="row g-2 mb-3">
             <div class="col-md-3">
                 <label class="form-label">Tanggal Awal</label>
                 <input type="date" name="tgl_awal" class="form-control" value="{{ tgl_awal }}">
@@ -50,17 +50,17 @@
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Tampilkan</button>
-                <a href="{% url 'report_index' %}" class="btn btn-secondary ms-2">Reset</a>
+                <a href="{% url 'report_index' %}" hx-get="{% url 'report_index' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-secondary ms-2">Reset</a>
             </div>
         </form>
 
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="text-muted">Menampilkan {{ page_obj|length }} dari {{ total }} transaksi</span>
             <div>
-                <a href="{% url 'report_export_excel' %}?{% if tgl_awal %}tgl_awal={{ tgl_awal }}&{% endif %}{% if tgl_akhir %}tgl_akhir={{ tgl_akhir }}&{% endif %}{% if status_filter %}status={{ status_filter }}{% endif %}" class="btn btn-success btn-sm">
+                <a href="{% url 'report_export_excel' %}?{% if tgl_awal %}tgl_awal={{ tgl_awal }}&{% endif %}{% if tgl_akhir %}tgl_akhir={{ tgl_akhir }}&{% endif %}{% if status_filter %}status={{ status_filter }}{% endif %}" hx-boost="false" class="btn btn-success btn-sm">
                     <i class="bi bi-file-earmark-excel"></i> Export Excel
                 </a>
-                <a href="{% url 'report_export_csv' %}?{% if tgl_awal %}tgl_awal={{ tgl_awal }}&{% endif %}{% if tgl_akhir %}tgl_akhir={{ tgl_akhir }}&{% endif %}{% if status_filter %}status={{ status_filter }}{% endif %}" class="btn btn-secondary btn-sm">
+                <a href="{% url 'report_export_csv' %}?{% if tgl_awal %}tgl_awal={{ tgl_awal }}&{% endif %}{% if tgl_akhir %}tgl_akhir={{ tgl_akhir }}&{% endif %}{% if status_filter %}status={{ status_filter }}{% endif %}" hx-boost="false" class="btn btn-secondary btn-sm">
                     <i class="bi bi-file-earmark-text"></i> Export CSV
                 </a>
             </div>
@@ -113,13 +113,13 @@
         <nav>
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page=1{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Awal</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Prev</a></li>
+                <li class="page-item"><a class="page-link" hx-get="?page=1{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" href="?page=1{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Awal</a></li>
+                <li class="page-item"><a class="page-link" hx-get="?page={{ page_obj.previous_page_number }}{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" href="?page={{ page_obj.previous_page_number }}{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Prev</a></li>
                 {% endif %}
                 <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
                 {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Akhir</a></li>
+                <li class="page-item"><a class="page-link" hx-get="?page={{ page_obj.next_page_number }}{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" href="?page={{ page_obj.next_page_number }}{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Next</a></li>
+                <li class="page-item"><a class="page-link" hx-get="?page={{ page_obj.paginator.num_pages }}{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" href="?page={{ page_obj.paginator.num_pages }}{% if tgl_awal %}&tgl_awal={{ tgl_awal }}{% endif %}{% if tgl_akhir %}&tgl_akhir={{ tgl_akhir }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Akhir</a></li>
                 {% endif %}
             </ul>
         </nav>

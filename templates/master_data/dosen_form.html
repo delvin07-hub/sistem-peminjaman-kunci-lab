@@ -8,7 +8,7 @@
         <div class="card shadow">
             <div class="card-header"><h5>{% if object %}Edit Dosen{% else %}Tambah Dosen{% endif %}</h5></div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" hx-post="" hx-target="#main-content" hx-select="#main-content">
                     {% csrf_token %}
                     {% for field in form %}
                     <div class="mb-3">
@@ -18,7 +18,7 @@
                     </div>
                     {% endfor %}
                     <div class="d-flex justify-content-between">
-                        <a href="{% url 'dosen_list' %}" class="btn btn-secondary">Batal</a>
+                        <a href="{% url 'dosen_list' %}" hx-get="{% url 'dosen_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-secondary">Batal</a>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </div>
                 </form>

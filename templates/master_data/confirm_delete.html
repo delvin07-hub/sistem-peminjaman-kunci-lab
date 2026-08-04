@@ -11,10 +11,10 @@
             <div class="card-body">
                 <p>Apakah Anda yakin ingin menghapus data berikut?</p>
                 <p class="fw-bold">{{ object }}</p>
-                <form method="post">
+                <form method="post" hx-post="" hx-target="#main-content" hx-select="#main-content">
                     {% csrf_token %}
                     <div class="d-flex justify-content-between">
-                        <a href="{{ cancel_url }}" class="btn btn-secondary">Batal</a>
+                        <a href="{{ cancel_url }}" hx-get="{{ cancel_url }}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-secondary">Batal</a>
                         <button type="submit" class="btn btn-danger">Ya, Hapus</button>
                     </div>
                 </form>
