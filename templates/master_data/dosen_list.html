@@ -4,19 +4,19 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4><i class="bi bi-person-badge-fill"></i> Data Dosen</h4>
-    <a href="{% url 'dosen_create' %}" class="btn btn-primary">
+    <a href="{% url 'dosen_create' %}" hx-get="{% url 'dosen_create' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Tambah Dosen
     </a>
 </div>
 
 <div class="card shadow">
     <div class="card-body">
-        <form method="get" class="mb-3">
+        <form method="get" hx-get="{% url 'dosen_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="mb-3">
             <div class="input-group">
                 <input type="text" name="search" class="form-control" placeholder="Cari NIDN atau Nama..." value="{{ request.GET.search }}">
                 <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
                 {% if request.GET.search %}
-                <a href="{% url 'dosen_list' %}" class="btn btn-outline-secondary">Reset</a>
+                <a href="{% url 'dosen_list' %}" hx-get="{% url 'dosen_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-outline-secondary">Reset</a>
                 {% endif %}
             </div>
         </form>
@@ -37,8 +37,8 @@
                         <td>{{ d.nidn }}</td>
                         <td>{{ d.nama }}</td>
                         <td>
-                            <a href="{% url 'dosen_update' d.id %}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
-                            <a href="{% url 'dosen_delete' d.id %}" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                            <a href="{% url 'dosen_update' d.id %}" hx-get="{% url 'dosen_update' d.id %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'dosen_delete' d.id %}" hx-get="{% url 'dosen_delete' d.id %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
                         </td>
                     </tr>
                     {% empty %}
