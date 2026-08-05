@@ -36,7 +36,7 @@
                         <td>{{ p.tanggal_pinjam|date:'d/m/Y' }}</td>
                         <td>{{ p.mahasiswa.nama }}<br><small class="text-muted">{{ p.mahasiswa.nim }}</small></td>
                         <td>{{ p.kunci.nomor_kunci }}</td>
-                        <td>{{ p.laboratorium.kode_lab }}</td>
+                        <td>{{ p.laboratorium.nama_lab }}</td>
                         <td>{{ p.jam_pinjam }}</td>
                         <td>
                             <a href="{% url 'pengembalian_process' p.id %}" class="btn btn-success btn-sm">
