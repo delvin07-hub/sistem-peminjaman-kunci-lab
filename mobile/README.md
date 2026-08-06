@@ -45,6 +45,6 @@ jawab sudah dibuat via Django Admin (`/admin/`), contoh: `pj1` / `pj12345`
 
 - **Web/Windows**: untuk pengembangan & demo. API backend harus menerima request
   dari origin tersebut (untuk produksi cukup pakai CORS sesuai kebutuhan).
-- **Android**: build APK butuh Android SDK. Token disimpan dengan
-  `shared_preferences`; untuk produksi sebaiknya ganti ke
-  `flutter_secure_storage`.
+- **Android**: build APK butuh Android SDK. Token disimpan aman
+  (`flutter_secure_storage`; di web memakai `shared_preferences` karena
+  dukungan secure storage web belum penuh).

@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'token_storage.dart';
 
 /// Ubah base URL sesuai server backend.
 /// Untuk HP Android yang menekan server di satu PC/lab, gunakan
@@ -31,17 +32,13 @@ class ApiService {
 
   ApiService._();
 
-  static Future<String?> get _storedToken async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('api_token');
-  }
+  static Future<String?> get _storedToken async => TokenStorage.read();
 
   static Future<void> saveToken(String? token) async {
-    final prefs = await SharedPreferences.getInstance();
     if (token == null) {
-      await prefs.remove('api_token');
+      await TokenStorage.clear();
     } else {
-      await prefs.setString('api_token', token);
+      await TokenStorage.write(token);
     }
   }
 
