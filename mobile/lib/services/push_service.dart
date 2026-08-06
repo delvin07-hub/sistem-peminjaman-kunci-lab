@@ -64,17 +64,24 @@ class PushService {
   }
 
   static Future<String?> refreshToken() async {
-    _fcmToken = await FirebaseMessaging.instance.getToken();
+    try {
+      _fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      debugPrint('FCM getToken gagal: $e');
+      _fcmToken = null;
+    }
     return _fcmToken;
   }
 
-  static Future<void> registerDeviceToken() async {
+  static Future<bool> registerDeviceToken() async {
     final token = await refreshToken();
-    if (token == null) return;
+    if (token == null) return false;
     try {
       await ApiService.instance.registerDeviceToken(token);
-    } catch (_) {
-      // Gagal registrasi tidak menghalangi login
+      return true;
+    } catch (e) {
+      debugPrint('Registrasi device token gagal: $e');
+      return false;
     }
   }
 

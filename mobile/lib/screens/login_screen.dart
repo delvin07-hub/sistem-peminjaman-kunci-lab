@@ -26,12 +26,26 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     try {
       await ApiService.instance.login(_username.text.trim(), _password.text);
-      await PushService.registerDeviceToken();
       if (!mounted) return;
       widget.onLogin();
+      final ok = await PushService.registerDeviceToken();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ok
+                ? 'Login berhasil. Notifikasi aktif.'
+                : 'Login berhasil, tetapi notifikasi push tidak aktif '
+                    'di perangkat ini.',
+          ),
+        ),
+      );
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _error = e.message);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = 'Terjadi kesalahan: $e');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
