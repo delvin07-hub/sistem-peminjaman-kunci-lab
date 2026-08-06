@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../api/api_service.dart';
+import '../services/push_service.dart';
 import 'kunci_screen.dart';
 import 'notifikasi_screen.dart';
 
@@ -60,6 +61,7 @@ class _LogoutPage extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.tonalIcon(
             onPressed: () async {
+              await PushService.unregisterDeviceToken();
               await ApiService.instance.logout();
               onLogout();
             },

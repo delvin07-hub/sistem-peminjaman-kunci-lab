@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../api/api_service.dart';
+import '../services/push_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback onLogin;
@@ -25,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     try {
       await ApiService.instance.login(_username.text.trim(), _password.text);
+      await PushService.registerDeviceToken();
       if (!mounted) return;
       widget.onLogin();
     } on ApiException catch (e) {

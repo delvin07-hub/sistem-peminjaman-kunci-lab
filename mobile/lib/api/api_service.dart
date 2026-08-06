@@ -86,6 +86,63 @@ class ApiService {
 
   Future<List<dynamic>> getNotifikasi() => getList('notifikasi/');
 
+  Future<dynamic> getDetail(String path) async {
+    final http.Response response;
+    try {
+      response = await http.get(
+        ApiConfig.uri(path),
+        headers: {'Authorization': 'Token $_token'},
+      );
+    } catch (e) {
+      throw ApiException('Tidak dapat terhubung ke server. Periksa koneksi '
+          'Wi-Fi dan pastikan server berjalan.');
+    }
+    if (response.statusCode != 200) {
+      throw ApiException('Gagal memuat detail (${response.statusCode})');
+    }
+    return _decode(response);
+  }
+
+  Future<void> registerDeviceToken(String token) async {
+    final http.Response response;
+    try {
+      response = await http.post(
+        ApiConfig.uri('device-token/'),
+        headers: {
+          'Authorization': 'Token $_token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'token': token}),
+      );
+    } catch (e) {
+      throw ApiException('Tidak dapat terhubung ke server. Periksa koneksi '
+          'Wi-Fi dan pastikan server berjalan.');
+    }
+    if (response.statusCode != 201) {
+      throw ApiException('Gagal registrasi perangkat (${response.statusCode})');
+    }
+  }
+
+  Future<void> unregisterDeviceToken(String token) async {
+    final http.Response response;
+    try {
+      response = await http.delete(
+        ApiConfig.uri('device-token/'),
+        headers: {
+          'Authorization': 'Token $_token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'token': token}),
+      );
+    } catch (e) {
+      throw ApiException('Tidak dapat terhubung ke server. Periksa koneksi '
+          'Wi-Fi dan pastikan server berjalan.');
+    }
+    if (response.statusCode != 204 && response.statusCode != 404) {
+      throw ApiException('Gagal hapus perangkat (${response.statusCode})');
+    }
+  }
+
   Future<dynamic> _authenticatedGet(String path) async {
     _token ??= await _storedToken;
     final http.Response response;

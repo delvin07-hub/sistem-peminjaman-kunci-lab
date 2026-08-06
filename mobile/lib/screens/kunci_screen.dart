@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../api/api_service.dart';
+import 'kunci_detail_screen.dart';
 
 class KunciScreen extends StatefulWidget {
   const KunciScreen({super.key});
@@ -51,6 +52,13 @@ class _KunciScreenState extends State<KunciScreen> {
               final item = items[index];
               final tersedia = item['status'] == 'Tersedia';
               return ListTile(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => KunciDetailScreen(kunciId: item['id']),
+                    ),
+                  );
+                },
                 leading: Icon(
                   tersedia ? Icons.key : Icons.key_off,
                   color: tersedia ? Colors.green : Colors.red,

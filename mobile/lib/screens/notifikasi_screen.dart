@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../api/api_service.dart';
+import 'notifikasi_detail_screen.dart';
 
 class NotifikasiScreen extends StatefulWidget {
   const NotifikasiScreen({super.key});
@@ -74,6 +75,15 @@ class _NotifikasiScreenState extends State<NotifikasiScreen> {
                 ),
                 onDismissed: (_) => _markBaca(item),
                 child: ListTile(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => NotifikasiDetailScreen(
+                          notifikasiId: item['id'],
+                        ),
+                      ),
+                    );
+                  },
                   leading: Icon(
                     item['tipe'] == 'Dikembalikan'
                         ? Icons.key
