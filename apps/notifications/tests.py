@@ -2,6 +2,8 @@ from datetime import time
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
 
 from apps.authentication.models import PenanggungJawab
 from apps.master_data.models import Mahasiswa, Dosen, Laboratorium, Kunci
@@ -70,3 +72,55 @@ class NotifikasiModelTest(TestCase):
             penanggung_jawab=self.pj, tipe='Dipinjam', pesan='x'
         )
         self.assertFalse(notif.dibaca)
+
+
+class NotifikasiAPITest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('pj_api', password='pw')
+        self.pj = PenanggungJawab.objects.create(
+            user=self.user, nama_lengkap='PJ API'
+        )
+        self.token = Token.objects.create(user=self.user)
+        self.client = APIClient()
+
+    def test_login_token(self):
+        response = self.client.post(
+            '/api/token/', {'username': 'pj_api', 'password': 'pw'}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('token', response.data)
+
+    def test_list_notifikasi_hanya_milik_sendiri(self):
+        Notifikasi.objects.create(
+            penanggung_jawab=self.pj, tipe='Dipinjam', pesan='x'
+        )
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        response = self.client.get('/api/notifikasi/')
+        self.assertEqual(response.status_code, 200)
+        results = response.data.get('results', response.data)
+        self.assertEqual(len(results), 1)
+
+    def test_tandai_baca(self):
+        notif = Notifikasi.objects.create(
+            penanggung_jawab=self.pj, tipe='Dipinjam', pesan='x'
+        )
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        response = self.client.patch(
+            f'/api/notifikasi/{notif.id}/baca/', {}, format='json'
+        )
+        self.assertEqual(response.status_code, 200)
+        notif.refresh_from_db()
+        self.assertTrue(notif.dibaca)
+
+    def test_status_kunci(self):
+        lab = Laboratorium.objects.create(kode_lab='LX', nama_lab='Lab X')
+        Kunci.objects.create(laboratorium=lab, nomor_kunci='K9')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        response = self.client.get('/api/status-kunci/')
+        self.assertEqual(response.status_code, 200)
+        results = response.data.get('results', response.data)
+        self.assertEqual(len(results), 1)
+
+    def test_akses_ditolak_tanpa_token(self):
+        response = self.client.get('/api/notifikasi/')
+        self.assertEqual(response.status_code, 401)
