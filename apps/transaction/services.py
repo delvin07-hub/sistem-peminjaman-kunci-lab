@@ -1,5 +1,8 @@
 from django.db import transaction
 from django.utils import timezone
+
+from apps.notifications.services import NotifikasiService
+
 from .models import Peminjaman
 
 
@@ -14,6 +17,7 @@ class PeminjamanService:
         peminjaman = Peminjaman.objects.create(**data)
         kunci.status = 'Dipinjam'
         kunci.save()
+        NotifikasiService.buat(peminjaman, 'Dipinjam')
         return peminjaman
 
     @staticmethod
@@ -29,4 +33,5 @@ class PeminjamanService:
         peminjaman.save()
         peminjaman.kunci.status = 'Tersedia'
         peminjaman.kunci.save()
+        NotifikasiService.buat(peminjaman, 'Dikembalikan')
         return peminjaman
