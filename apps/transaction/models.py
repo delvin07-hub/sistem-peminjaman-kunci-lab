@@ -16,7 +16,8 @@ class Peminjaman(models.Model):
         Dosen, on_delete=models.CASCADE, related_name='peminjaman'
     )
     laboratorium = models.ForeignKey(
-        Laboratorium, on_delete=models.CASCADE, related_name='peminjaman'
+        Laboratorium, on_delete=models.CASCADE, related_name='peminjaman',
+        verbose_name='Ruangan'
     )
     kunci = models.ForeignKey(
         Kunci, on_delete=models.CASCADE, related_name='peminjaman'

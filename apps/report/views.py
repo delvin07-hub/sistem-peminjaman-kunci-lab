@@ -13,7 +13,7 @@ from apps.transaction.models import Peminjaman
 
 EXPORT_HEADERS = [
     'No', 'Tanggal Pinjam', 'NIM', 'Nama Mahasiswa',
-    'Program Studi', 'Dosen', 'Lab', 'Nomor Kunci',
+    'Program Studi', 'Dosen', 'Ruangan', 'Nomor Kunci',
     'Jam Pinjam', 'Tanggal Kembali', 'Jam Kembali', 'Keperluan', 'Status',
 ]
 

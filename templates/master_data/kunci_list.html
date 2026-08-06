@@ -14,7 +14,7 @@
         <form method="get" hx-get="{% url 'kunci_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="row g-2 mb-3">
             <div class="col-md-4">
                 <select name="lab" class="form-select">
-                    <option value="">-- Semua Lab --</option>
+                    <option value="">-- Semua Ruangan --</option>
                     {% for lab in lab_list %}
                     <option value="{{ lab.id }}" {% if request.GET.lab == lab.id|stringformat:'s' %}selected{% endif %}>{{ lab.kode_lab }} - {{ lab.nama_lab }}</option>
                     {% endfor %}
@@ -34,7 +34,7 @@
                     <tr>
                         <th>#</th>
                         <th>Nomor Kunci</th>
-                        <th>Laboratorium</th>
+                        <th>Ruangan</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>

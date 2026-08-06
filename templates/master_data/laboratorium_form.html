@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
-{% block title %}{% if object %}Edit Lab{% else %}Tambah Lab{% endif %}{% endblock %}
+{% block title %}{% if object %}Edit Ruangan{% else %}Tambah Ruangan{% endif %}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card shadow">
-            <div class="card-header"><h5>{% if object %}Edit Laboratorium{% else %}Tambah Laboratorium{% endif %}</h5></div>
+            <div class="card-header"><h5>{% if object %}Edit Ruangan{% else %}Tambah Ruangan{% endif %}</h5></div>
             <div class="card-body">
                 <form method="post" hx-post="" hx-target="#main-content" hx-select="#main-content">
                     {% csrf_token %}

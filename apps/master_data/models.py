@@ -53,7 +53,8 @@ class Kunci(models.Model):
     ]
 
     laboratorium = models.ForeignKey(
-        Laboratorium, on_delete=models.CASCADE, related_name='kunci'
+        Laboratorium, on_delete=models.CASCADE, related_name='kunci',
+        verbose_name='Ruangan'
     )
     nomor_kunci = models.CharField(max_length=20)
     status = models.CharField(

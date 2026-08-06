@@ -25,3 +25,13 @@ class PeminjamanForm(forms.ModelForm):
         if kunci.status != 'Tersedia':
             raise forms.ValidationError(f"Kunci {kunci.nomor_kunci} sedang tidak tersedia!")
         return kunci
+
+    def clean(self):
+        cleaned = super().clean()
+        lab = cleaned.get('laboratorium')
+        kunci = cleaned.get('kunci')
+        if lab and kunci and kunci.laboratorium_id != lab.id:
+            self.add_error(
+                'kunci', 'Kunci tidak sesuai dengan ruangan yang dipilih.'
+            )
+        return cleaned

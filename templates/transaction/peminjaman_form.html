@@ -7,7 +7,7 @@
     <div class="col-md-8">
         <div class="card shadow">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-box-arrow-in-right"></i> Form Peminjaman Kunci Laboratorium</h5>
+                <h5 class="mb-0"><i class="bi bi-box-arrow-in-right"></i> Form Peminjaman Kunci</h5>
             </div>
             <div class="card-body">
                 <form method="post" hx-post="" hx-target="#main-content" hx-select="#main-content" id="form-peminjaman">
@@ -28,7 +28,7 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Laboratorium</label>
+                            <label class="form-label">Ruangan</label>
                             {{ form.laboratorium|add_class:"form-select" }}
                             {% if form.laboratorium.errors %}<div class="text-danger small">{{ form.laboratorium.errors.0 }}</div>{% endif %}
                         </div>
@@ -63,18 +63,25 @@
 
 {% block extra_js %}
 <script>
-$(document).ready(function() {
-    $('#id_laboratorium').on('change', function() {
-        var labId = $(this).val();
-        var $kunci = $('#id_kunci');
-        $kunci.empty().append('<option value="">-- Pilih Kunci --</option>');
-        if (labId) {
-            $.getJSON('/transaksi/api/get-kunci/', { lab_id: labId }, function(data) {
-                $.each(data.results, function(i, item) {
-                    $kunci.append('<option value="' + item.id + '">' + item.text + '</option>');
-                });
+function refreshKunci(labId) {
+    var $kunci = $('#id_kunci');
+    $kunci.empty();
+    $kunci.prop('disabled', !labId);
+    if (labId) {
+        $kunci.append('<option value="">-- Pilih Kunci --</option>');
+        $.getJSON('/transaksi/api/get-kunci/', { lab_id: labId }, function(data) {
+            $.each(data.results, function(i, item) {
+                $kunci.append('<option value="' + item.id + '">' + item.text + '</option>');
             });
-        }
+        });
+    } else {
+        $kunci.append('<option value="">-- Pilih ruangan terlebih dahulu --</option>');
+    }
+}
+$(document).ready(function() {
+    refreshKunci($('#id_laboratorium').val());
+    $('#id_laboratorium').on('change', function() {
+        refreshKunci($(this).val());
     });
 });
 </script>

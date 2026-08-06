@@ -152,3 +152,57 @@ class JamPinjamOtomatisTest(TestCase):
             p = self._pinjam()
         self.assertEqual(p.tanggal_pinjam, date(2026, 8, 6))
         self.assertEqual(p.jam_pinjam, time(14, 32, 5))
+
+
+class KunciRuanganValidasiTest(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_superuser('root', 'r@x.com', 'pw')
+        self.client.force_login(self.admin)
+        self.lab_a = Laboratorium.objects.create(
+            kode_lab='LA', nama_lab='Ruang A'
+        )
+        self.lab_b = Laboratorium.objects.create(
+            kode_lab='LB', nama_lab='Ruang B'
+        )
+        self.kunci_a = Kunci.objects.create(
+            laboratorium=self.lab_a, nomor_kunci='KA', status='Tersedia'
+        )
+        self.kunci_b = Kunci.objects.create(
+            laboratorium=self.lab_b, nomor_kunci='KB', status='Tersedia'
+        )
+        self.mahasiswa = Mahasiswa.objects.create(
+            nim='2209005', nama='Sari', program_studi='TI'
+        )
+        self.dosen = Dosen.objects.create(nidn='ND5', nama='Dosen S')
+
+    def _post_form(self, lab, kunci):
+        return self.client.post(reverse('peminjaman_create'), {
+            'mahasiswa': self.mahasiswa.id,
+            'dosen': self.dosen.id,
+            'laboratorium': lab.id,
+            'kunci': kunci.id,
+            'keperluan': 'Praktikum',
+        })
+
+    def test_service_tolak_kunci_beda_ruangan(self):
+        with self.assertRaises(ValueError):
+            PeminjamanService.pinjam_kunci({
+                'mahasiswa': self.mahasiswa,
+                'dosen': self.dosen,
+                'laboratorium': self.lab_a,
+                'kunci': self.kunci_b,
+                'keperluan': 'Praktikum',
+            })
+
+    def test_form_tolak_kunci_beda_ruangan(self):
+        response = self._post_form(self.lab_a, self.kunci_b)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response, 'Kunci tidak sesuai dengan ruangan yang dipilih.'
+        )
+        self.assertFalse(Peminjaman.objects.filter(mahasiswa=self.mahasiswa).exists())
+
+    def test_form_terima_kunci_seruangan(self):
+        response = self._post_form(self.lab_a, self.kunci_a)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Peminjaman.objects.filter(mahasiswa=self.mahasiswa).exists())

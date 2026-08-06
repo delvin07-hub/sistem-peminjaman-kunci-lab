@@ -12,6 +12,11 @@ class PeminjamanService:
     @transaction.atomic
     def pinjam_kunci(data: dict) -> Peminjaman:
         kunci = data['kunci']
+        lab = data.get('laboratorium')
+        if lab is not None and kunci.laboratorium_id != lab.id:
+            raise ValueError(
+                f"Kunci {kunci.nomor_kunci} tidak sesuai dengan ruangan yang dipilih"
+            )
         if kunci.status != 'Tersedia':
             raise ValueError(f"Kunci {kunci.nomor_kunci} sedang dipinjam")
         now = timezone.localtime()
