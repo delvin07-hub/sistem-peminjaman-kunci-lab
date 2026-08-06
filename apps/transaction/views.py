@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .forms import PeminjamanForm
+from .filters import PeminjamanFilter
 from .models import Peminjaman
 from .services import PeminjamanService
 from apps.master_data.models import Kunci, Mahasiswa
@@ -102,20 +103,20 @@ def riwayat_list(request):
     )
 
     search = request.GET.get('search')
-    status = request.GET.get('status')
-
     if search:
         qs = qs.filter(_search_peminjaman_q(search))
-    if status:
-        qs = qs.filter(status=status)
+
+    filter_set = PeminjamanFilter(request.GET, queryset=qs)
+    qs = filter_set.qs
 
     paginator = Paginator(qs, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'transaction/riwayat_list.html', {
         'page_obj': page_obj,
+        'filter_set': filter_set,
         'search': search,
-        'status_filter': status,
+        'status_filter': request.GET.get('status', ''),
     })
 
 

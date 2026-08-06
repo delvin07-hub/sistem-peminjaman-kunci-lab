@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from apps.master_data.models import Mahasiswa, Dosen, Laboratorium, Kunci
 
 
@@ -20,7 +21,7 @@ class Peminjaman(models.Model):
     kunci = models.ForeignKey(
         Kunci, on_delete=models.CASCADE, related_name='peminjaman'
     )
-    tanggal_pinjam = models.DateField(auto_now_add=True)
+    tanggal_pinjam = models.DateField(default=timezone.localdate)
     jam_pinjam = models.TimeField()
     tanggal_kembali = models.DateField(null=True, blank=True)
     jam_kembali = models.TimeField(null=True, blank=True)

@@ -7,17 +7,23 @@
 <div class="card shadow">
     <div class="card-body">
         <form method="get" hx-get="{% url 'riwayat_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="row g-2 mb-3">
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <input type="text" name="search" class="form-control" placeholder="Cari NIM/Nama/No Kunci..." value="{{ search|default:'' }}">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <input type="date" name="tanggal_awal" class="form-control" value="{{ filter_set.form.tanggal_awal.value|default:'' }}">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="tanggal_akhir" class="form-control" value="{{ filter_set.form.tanggal_akhir.value|default:'' }}">
+            </div>
+            <div class="col-md-2">
                 <select name="status" class="form-select">
                     <option value="">-- Semua Status --</option>
                     <option value="Dipinjam" {% if status_filter == 'Dipinjam' %}selected{% endif %}>Dipinjam</option>
                     <option value="Dikembalikan" {% if status_filter == 'Dikembalikan' %}selected{% endif %}>Dikembalikan</option>
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
                 <a href="{% url 'riwayat_list' %}" hx-get="{% url 'riwayat_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-outline-secondary">Reset</a>
             </div>
@@ -72,13 +78,13 @@
         <nav>
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" hx-get="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Awal</a></li>
-                <li class="page-item"><a class="page-link" hx-get="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Prev</a></li>
+                <li class="page-item"><a class="page-link" hx-get="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if filter_set.form.tanggal_awal.value %}&tanggal_awal={{ filter_set.form.tanggal_awal.value }}{% endif %}{% if filter_set.form.tanggal_akhir.value %}&tanggal_akhir={{ filter_set.form.tanggal_akhir.value }}{% endif %}" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if filter_set.form.tanggal_awal.value %}&tanggal_awal={{ filter_set.form.tanggal_awal.value }}{% endif %}{% if filter_set.form.tanggal_akhir.value %}&tanggal_akhir={{ filter_set.form.tanggal_akhir.value }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Awal</a></li>
+                <li class="page-item"><a class="page-link" hx-get="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if filter_set.form.tanggal_awal.value %}&tanggal_awal={{ filter_set.form.tanggal_awal.value }}{% endif %}{% if filter_set.form.tanggal_akhir.value %}&tanggal_akhir={{ filter_set.form.tanggal_akhir.value }}{% endif %}" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if filter_set.form.tanggal_awal.value %}&tanggal_awal={{ filter_set.form.tanggal_awal.value }}{% endif %}{% if filter_set.form.tanggal_akhir.value %}&tanggal_akhir={{ filter_set.form.tanggal_akhir.value }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Prev</a></li>
                 {% endif %}
                 <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
                 {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" hx-get="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Next</a></li>
-                <li class="page-item"><a class="page-link" hx-get="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Akhir</a></li>
+                <li class="page-item"><a class="page-link" hx-get="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if filter_set.form.tanggal_awal.value %}&tanggal_awal={{ filter_set.form.tanggal_awal.value }}{% endif %}{% if filter_set.form.tanggal_akhir.value %}&tanggal_akhir={{ filter_set.form.tanggal_akhir.value }}{% endif %}" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if filter_set.form.tanggal_awal.value %}&tanggal_awal={{ filter_set.form.tanggal_awal.value }}{% endif %}{% if filter_set.form.tanggal_akhir.value %}&tanggal_akhir={{ filter_set.form.tanggal_akhir.value }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Next</a></li>
+                <li class="page-item"><a class="page-link" hx-get="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if filter_set.form.tanggal_awal.value %}&tanggal_awal={{ filter_set.form.tanggal_awal.value }}{% endif %}{% if filter_set.form.tanggal_akhir.value %}&tanggal_akhir={{ filter_set.form.tanggal_akhir.value }}{% endif %}" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if filter_set.form.tanggal_awal.value %}&tanggal_awal={{ filter_set.form.tanggal_awal.value }}{% endif %}{% if filter_set.form.tanggal_akhir.value %}&tanggal_akhir={{ filter_set.form.tanggal_akhir.value }}{% endif %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true">Akhir</a></li>
                 {% endif %}
             </ul>
         </nav>
