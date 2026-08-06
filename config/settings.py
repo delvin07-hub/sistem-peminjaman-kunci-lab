@@ -133,3 +133,7 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL', 'True') == 'True'
 CORS_ALLOW_CREDENTIALS = True
+
+FCM_SERVICE_ACCOUNT_JSON = os.environ.get(
+    'FCM_SERVICE_ACCOUNT_JSON', BASE_DIR / 'serviceAccountKey.json'
+)

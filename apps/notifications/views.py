@@ -2,9 +2,14 @@ from rest_framework import generics
 
 from apps.master_data.models import Kunci
 
-from .models import Notifikasi
+from .models import DeviceToken, Notifikasi
 from .permissions import IsPenanggungJawab
-from .serializers import KunciStatusSerializer, NotifikasiSerializer
+from .serializers import (
+    DeviceTokenSerializer,
+    KunciDetailEndpointSerializer,
+    KunciStatusSerializer,
+    NotifikasiSerializer,
+)
 
 
 class NotifikasiListView(generics.ListAPIView):
@@ -40,3 +45,26 @@ class KunciStatusListView(generics.ListAPIView):
     permission_classes = [IsPenanggungJawab]
     serializer_class = KunciStatusSerializer
     queryset = Kunci.objects.select_related('laboratorium')
+
+
+class KunciStatusDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsPenanggungJawab]
+    serializer_class = KunciDetailEndpointSerializer
+    queryset = Kunci.objects.select_related('laboratorium')
+
+
+class DeviceTokenView(generics.CreateAPIView):
+    permission_classes = [IsPenanggungJawab]
+    serializer_class = DeviceTokenSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(penanggung_jawab=self.request.user.penanggung_jawab)
+
+
+class DeviceTokenDeleteView(generics.DestroyAPIView):
+    permission_classes = [IsPenanggungJawab]
+
+    def get_queryset(self):
+        return DeviceToken.objects.filter(
+            penanggung_jawab__user=self.request.user
+        )
