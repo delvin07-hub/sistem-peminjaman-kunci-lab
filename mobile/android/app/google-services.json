@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "747071941869",
+    "project_id": "pinjam-kunci-28bda",
+    "storage_bucket": "pinjam-kunci-28bda.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747071941869:android:8622c31c1828aac279b0e4",
+        "android_client_info": {
+          "package_name": "com.delvin07.kunci_lab_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXr5i2TwTMlx2_J-Y_KrX6uahOBke0p-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
