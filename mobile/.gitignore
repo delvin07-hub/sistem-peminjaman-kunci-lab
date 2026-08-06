@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# APK build lokal (file siap pasang, bukan sumber)
+/app-release.apk

@@ -48,11 +48,17 @@ class ApiService {
   }
 
   Future<void> login(String username, String password) async {
-    final response = await http.post(
-      ApiConfig.uri('token/'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'password': password}),
-    );
+    final http.Response response;
+    try {
+      response = await http.post(
+        ApiConfig.uri('token/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'password': password}),
+      );
+    } catch (e) {
+      throw ApiException('Tidak dapat terhubung ke server. Periksa koneksi '
+          'Wi-Fi dan pastikan server berjalan.');
+    }
     final data = _decode(response);
     if (response.statusCode == 200) {
       _token = data['token'] as String;
@@ -82,23 +88,35 @@ class ApiService {
 
   Future<dynamic> _authenticatedGet(String path) async {
     _token ??= await _storedToken;
-    final response = await http.get(
-      ApiConfig.uri(path),
-      headers: {'Authorization': 'Token $_token'},
-    );
+    final http.Response response;
+    try {
+      response = await http.get(
+        ApiConfig.uri(path),
+        headers: {'Authorization': 'Token $_token'},
+      );
+    } catch (e) {
+      throw ApiException('Tidak dapat terhubung ke server. Periksa koneksi '
+          'Wi-Fi dan pastikan server berjalan.');
+    }
     return _decode(response);
   }
 
   Future<void> markBaca(int id) async {
     _token ??= await _storedToken;
-    final response = await http.patch(
-      ApiConfig.uri('notifikasi/$id/baca/'),
-      headers: {
-        'Authorization': 'Token $_token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'dibaca': true}),
-    );
+    final http.Response response;
+    try {
+      response = await http.patch(
+        ApiConfig.uri('notifikasi/$id/baca/'),
+        headers: {
+          'Authorization': 'Token $_token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'dibaca': true}),
+      );
+    } catch (e) {
+      throw ApiException('Tidak dapat terhubung ke server. Periksa koneksi '
+          'Wi-Fi dan pastikan server berjalan.');
+    }
     if (response.statusCode != 200) {
       throw ApiException('Gagal menandai dibaca (${response.statusCode})');
     }
