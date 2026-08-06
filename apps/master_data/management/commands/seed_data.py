@@ -2,6 +2,7 @@ from datetime import time, date, timedelta
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from django.utils import timezone
+from apps.authentication.models import PenanggungJawab
 from apps.master_data.models import Mahasiswa, Dosen, Laboratorium, Kunci
 from apps.transaction.models import Peminjaman
 
@@ -13,6 +14,7 @@ class Command(BaseCommand):
         self.stdout.write('Mengisi data awal...')
 
         self._create_superuser()
+        self._create_penanggung_jawab()
         self._create_mahasiswa()
         self._create_dosen()
         self._create_laboratorium()
@@ -25,6 +27,16 @@ class Command(BaseCommand):
         if not User.objects.filter(username='admin').exists():
             User.objects.create_superuser('admin', 'admin@lab.com', 'admin123')
             self.stdout.write('  [OK] Superuser admin/admin123')
+
+    def _create_penanggung_jawab(self):
+        if not User.objects.filter(username='pj1').exists():
+            user = User.objects.create_user('pj1', password='pj12345')
+            PenanggungJawab.objects.create(
+                user=user,
+                nama_lengkap='Penanggung Jawab Lab',
+                telepon='081234567890',
+            )
+            self.stdout.write('  [OK] Penanggung jawab pj1/pj12345')
 
     def _create_mahasiswa(self):
         data = [
