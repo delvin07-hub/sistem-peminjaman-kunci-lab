@@ -3,7 +3,7 @@ import csv
 import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
-from django.contrib.auth.decorators import login_required
+from apps.authentication.mixins import admin_required
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -70,7 +70,7 @@ def _peminjaman_to_row(i, p):
     ]
 
 
-@login_required
+@admin_required
 def laporan_view(request):
     peminjaman, tgl_awal, tgl_akhir, status = _get_filtered_data(request)
 
@@ -92,7 +92,7 @@ def laporan_view(request):
     return render(request, 'report/laporan.html', context)
 
 
-@login_required
+@admin_required
 def export_excel(request):
     peminjaman, _, _, _ = _get_filtered_data(request)
 
@@ -132,7 +132,7 @@ def export_excel(request):
     return response
 
 
-@login_required
+@admin_required
 def export_csv(request):
     peminjaman, _, _, _ = _get_filtered_data(request)
 

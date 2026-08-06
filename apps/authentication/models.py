@@ -19,3 +19,8 @@ class PenanggungJawab(models.Model):
 
     def __str__(self):
         return self.nama_lengkap
+
+    def delete(self, *args, **kwargs):
+        user = self.user
+        super().delete(*args, **kwargs)
+        user.delete()

@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from apps.authentication.mixins import admin_required
 from .forms import PeminjamanForm
 from .filters import PeminjamanFilter
 from .models import Peminjaman
@@ -22,7 +23,7 @@ def _search_peminjaman_q(term):
     )
 
 
-@login_required
+@admin_required
 def peminjaman_create(request):
     if request.method == 'POST':
         form = PeminjamanForm(request.POST)
@@ -41,7 +42,7 @@ def peminjaman_create(request):
     return render(request, 'transaction/peminjaman_form.html', {'form': form})
 
 
-@login_required
+@admin_required
 def get_mahasiswa(request):
     term = request.GET.get('term', '')
     data = [
@@ -53,7 +54,7 @@ def get_mahasiswa(request):
     return JsonResponse({'results': data})
 
 
-@login_required
+@admin_required
 def get_kunci(request):
     lab_id = request.GET.get('lab_id')
     qs = Kunci.objects.filter(status='Tersedia')
@@ -63,7 +64,7 @@ def get_kunci(request):
     return JsonResponse({'results': data})
 
 
-@login_required
+@admin_required
 def pengembalian_list(request):
     qs = Peminjaman.objects.filter(status='Dipinjam').select_related(
         'mahasiswa', 'kunci', 'laboratorium'
@@ -74,7 +75,7 @@ def pengembalian_list(request):
     return render(request, 'transaction/pengembalian_list.html', {'data': qs})
 
 
-@login_required
+@admin_required
 def pengembalian_process(request, pk):
     peminjaman = get_object_or_404(
         Peminjaman.objects.select_related('kunci', 'mahasiswa', 'laboratorium', 'dosen'),
@@ -96,7 +97,7 @@ def pengembalian_process(request, pk):
     })
 
 
-@login_required
+@admin_required
 def riwayat_list(request):
     qs = Peminjaman.objects.select_related(
         'mahasiswa', 'kunci', 'laboratorium', 'dosen'
@@ -120,7 +121,7 @@ def riwayat_list(request):
     })
 
 
-@login_required
+@admin_required
 def search(request):
     query = request.GET.get('q', '')
     data = [

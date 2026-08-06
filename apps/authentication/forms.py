@@ -1,11 +1,20 @@
 from django import forms
-from django.contrib import admin
 from django.contrib.auth.models import User
 
 from .models import PenanggungJawab
 
 
-class PenanggungJawabAdminForm(forms.ModelForm):
+class _BootstrapFormMixin:
+    """Auto-apply Bootstrap classes to all form fields."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            widget = field.widget
+            css = 'form-select' if isinstance(widget, forms.Select) else 'form-control'
+            widget.attrs.setdefault('class', css)
+
+
+class PenanggungJawabForm(_BootstrapFormMixin, forms.ModelForm):
     username = forms.CharField(max_length=150, label='Username')
     password = forms.CharField(
         widget=forms.PasswordInput,
@@ -27,6 +36,15 @@ class PenanggungJawabAdminForm(forms.ModelForm):
                 'Kosongkan bila tidak ingin mengubah password.'
             )
 
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        qs = User.objects.filter(username=username)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.user_id)
+        if qs.exists():
+            raise forms.ValidationError('Username sudah dipakai.')
+        return username
+
     def save(self, commit=True):
         pj = super().save(commit=False)
         username = self.cleaned_data.get('username')
@@ -47,14 +65,4 @@ class PenanggungJawabAdminForm(forms.ModelForm):
 
         pj.user = user
         pj.save()
-        if commit:
-            pj.save_m2m()
         return pj
-
-
-@admin.register(PenanggungJawab)
-class PenanggungJawabAdmin(admin.ModelAdmin):
-    form = PenanggungJawabAdminForm
-    list_display = ['nama_lengkap', 'telepon', 'aktif', 'user']
-    list_filter = ['aktif']
-    search_fields = ['nama_lengkap', 'telepon', 'user__username']

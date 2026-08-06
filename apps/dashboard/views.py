@@ -1,14 +1,14 @@
 from datetime import date
 
-from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
 from django.shortcuts import render
 
+from apps.authentication.mixins import admin_required
 from apps.master_data.models import Kunci
 from apps.transaction.models import Peminjaman
 
 
-@login_required
+@admin_required
 def index(request):
     stats = Kunci.objects.aggregate(
         total=Count('id'),

@@ -1,12 +1,12 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.authentication.mixins import AdminRequiredMixin
 from django.db.models import Q
 from .models import Mahasiswa, Dosen, Laboratorium, Kunci
 from .forms import MahasiswaForm, DosenForm, LaboratoriumForm, KunciForm
 
 
-class MahasiswaListView(LoginRequiredMixin, ListView):
+class MahasiswaListView(AdminRequiredMixin, ListView):
     model = Mahasiswa
     template_name = 'master_data/mahasiswa_list.html'
     context_object_name = 'data'
@@ -22,21 +22,21 @@ class MahasiswaListView(LoginRequiredMixin, ListView):
         return qs
 
 
-class MahasiswaCreateView(LoginRequiredMixin, CreateView):
+class MahasiswaCreateView(AdminRequiredMixin, CreateView):
     model = Mahasiswa
     form_class = MahasiswaForm
     template_name = 'master_data/mahasiswa_form.html'
     success_url = reverse_lazy('mahasiswa_list')
 
 
-class MahasiswaUpdateView(LoginRequiredMixin, UpdateView):
+class MahasiswaUpdateView(AdminRequiredMixin, UpdateView):
     model = Mahasiswa
     form_class = MahasiswaForm
     template_name = 'master_data/mahasiswa_form.html'
     success_url = reverse_lazy('mahasiswa_list')
 
 
-class MahasiswaDeleteView(LoginRequiredMixin, DeleteView):
+class MahasiswaDeleteView(AdminRequiredMixin, DeleteView):
     model = Mahasiswa
     success_url = reverse_lazy('mahasiswa_list')
     template_name = 'master_data/confirm_delete.html'
@@ -47,7 +47,7 @@ class MahasiswaDeleteView(LoginRequiredMixin, DeleteView):
         return context
 
 
-class DosenListView(LoginRequiredMixin, ListView):
+class DosenListView(AdminRequiredMixin, ListView):
     model = Dosen
     template_name = 'master_data/dosen_list.html'
     context_object_name = 'data'
@@ -63,21 +63,21 @@ class DosenListView(LoginRequiredMixin, ListView):
         return qs
 
 
-class DosenCreateView(LoginRequiredMixin, CreateView):
+class DosenCreateView(AdminRequiredMixin, CreateView):
     model = Dosen
     form_class = DosenForm
     template_name = 'master_data/dosen_form.html'
     success_url = reverse_lazy('dosen_list')
 
 
-class DosenUpdateView(LoginRequiredMixin, UpdateView):
+class DosenUpdateView(AdminRequiredMixin, UpdateView):
     model = Dosen
     form_class = DosenForm
     template_name = 'master_data/dosen_form.html'
     success_url = reverse_lazy('dosen_list')
 
 
-class DosenDeleteView(LoginRequiredMixin, DeleteView):
+class DosenDeleteView(AdminRequiredMixin, DeleteView):
     model = Dosen
     success_url = reverse_lazy('dosen_list')
     template_name = 'master_data/confirm_delete.html'
@@ -88,7 +88,7 @@ class DosenDeleteView(LoginRequiredMixin, DeleteView):
         return context
 
 
-class LaboratoriumListView(LoginRequiredMixin, ListView):
+class LaboratoriumListView(AdminRequiredMixin, ListView):
     model = Laboratorium
     template_name = 'master_data/laboratorium_list.html'
     context_object_name = 'data'
@@ -104,21 +104,21 @@ class LaboratoriumListView(LoginRequiredMixin, ListView):
         return qs
 
 
-class LaboratoriumCreateView(LoginRequiredMixin, CreateView):
+class LaboratoriumCreateView(AdminRequiredMixin, CreateView):
     model = Laboratorium
     form_class = LaboratoriumForm
     template_name = 'master_data/laboratorium_form.html'
     success_url = reverse_lazy('laboratorium_list')
 
 
-class LaboratoriumUpdateView(LoginRequiredMixin, UpdateView):
+class LaboratoriumUpdateView(AdminRequiredMixin, UpdateView):
     model = Laboratorium
     form_class = LaboratoriumForm
     template_name = 'master_data/laboratorium_form.html'
     success_url = reverse_lazy('laboratorium_list')
 
 
-class LaboratoriumDeleteView(LoginRequiredMixin, DeleteView):
+class LaboratoriumDeleteView(AdminRequiredMixin, DeleteView):
     model = Laboratorium
     success_url = reverse_lazy('laboratorium_list')
     template_name = 'master_data/confirm_delete.html'
@@ -129,7 +129,7 @@ class LaboratoriumDeleteView(LoginRequiredMixin, DeleteView):
         return context
 
 
-class KunciListView(LoginRequiredMixin, ListView):
+class KunciListView(AdminRequiredMixin, ListView):
     model = Kunci
     template_name = 'master_data/kunci_list.html'
     context_object_name = 'data'
@@ -151,21 +151,21 @@ class KunciListView(LoginRequiredMixin, ListView):
         return context
 
 
-class KunciCreateView(LoginRequiredMixin, CreateView):
+class KunciCreateView(AdminRequiredMixin, CreateView):
     model = Kunci
     form_class = KunciForm
     template_name = 'master_data/kunci_form.html'
     success_url = reverse_lazy('kunci_list')
 
 
-class KunciUpdateView(LoginRequiredMixin, UpdateView):
+class KunciUpdateView(AdminRequiredMixin, UpdateView):
     model = Kunci
     form_class = KunciForm
     template_name = 'master_data/kunci_form.html'
     success_url = reverse_lazy('kunci_list')
 
 
-class KunciDeleteView(LoginRequiredMixin, DeleteView):
+class KunciDeleteView(AdminRequiredMixin, DeleteView):
     model = Kunci
     success_url = reverse_lazy('kunci_list')
     template_name = 'master_data/confirm_delete.html'
