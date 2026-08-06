@@ -1,4 +1,5 @@
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.response import Response
 
 from apps.master_data.models import Kunci
 
@@ -60,11 +61,19 @@ class DeviceTokenView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(penanggung_jawab=self.request.user.penanggung_jawab)
 
-
-class DeviceTokenDeleteView(generics.DestroyAPIView):
-    permission_classes = [IsPenanggungJawab]
-
-    def get_queryset(self):
-        return DeviceToken.objects.filter(
-            penanggung_jawab__user=self.request.user
-        )
+    def delete(self, request, *args, **kwargs):
+        token = request.data.get('token') or request.query_params.get('token')
+        if not token:
+            return Response(
+                {'detail': 'Token tidak diberikan.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        deleted, _ = DeviceToken.objects.filter(
+            penanggung_jawab__user=request.user, token=token
+        ).delete()
+        if not deleted:
+            return Response(
+                {'detail': 'Token tidak ditemukan.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)

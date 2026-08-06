@@ -224,10 +224,11 @@ class NotifikasiAPITest(TestCase):
         dt = DeviceToken.objects.get(token='fcm-token-abc')
         self.assertEqual(dt.penanggung_jawab, self.pj)
 
-        token_id = response.data['id']
-        response = self.client.delete(f'/api/device-token/{token_id}/')
+        response = self.client.delete(
+            '/api/device-token/', {'token': 'fcm-token-abc'}, format='json'
+        )
         self.assertEqual(response.status_code, 204)
-        self.assertFalse(DeviceToken.objects.filter(pk=token_id).exists())
+        self.assertFalse(DeviceToken.objects.filter(pk=dt.pk).exists())
 
     def test_device_token_milik_orang_lain_tidak_bisa_dihapus(self):
         from .models import DeviceToken
@@ -236,11 +237,13 @@ class NotifikasiAPITest(TestCase):
         other_pj = PenanggungJawab.objects.create(
             user=other_user, nama_lengkap='PJ Lain'
         )
-        dt = DeviceToken.objects.create(
+        DeviceToken.objects.create(
             penanggung_jawab=other_pj, token='fcm-token-lain'
         )
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
-        response = self.client.delete(f'/api/device-token/{dt.id}/')
+        response = self.client.delete(
+            '/api/device-token/', {'token': 'fcm-token-lain'}, format='json'
+        )
         self.assertEqual(response.status_code, 404)
 
 
