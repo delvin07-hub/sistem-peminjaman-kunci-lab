@@ -119,9 +119,9 @@ class NotifikasiService:
         if tipe == 'Dipinjam':
             return (
                 f'{mhs.nama} meminjam kunci {kunci.nomor_kunci}'
-                f' ({lab.kode_lab}) jam {peminjaman.jam_pinjam}'
+                f' ({lab.nama_lab}) jam {peminjaman.jam_pinjam}'
             )
         return (
             f'{mhs.nama} mengembalikan kunci {kunci.nomor_kunci}'
-            f' ({lab.kode_lab})'
+            f' ({lab.nama_lab})'
         )

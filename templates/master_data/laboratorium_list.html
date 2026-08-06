@@ -13,7 +13,7 @@
     <div class="card-body">
         <form method="get" hx-get="{% url 'laboratorium_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="mb-3">
             <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Cari kode atau nama lab..." value="{{ request.GET.search }}">
+                <input type="text" name="search" class="form-control" placeholder="Cari nama ruangan..." value="{{ request.GET.search }}">
                 <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
                 {% if request.GET.search %}
                 <a href="{% url 'laboratorium_list' %}" hx-get="{% url 'laboratorium_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-outline-secondary">Reset</a>
@@ -25,7 +25,6 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Kode Ruangan</th>
                         <th>Nama Ruangan</th>
                         <th>Gedung</th>
                         <th>Lantai</th>
@@ -36,7 +35,6 @@
                     {% for l in data %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ l.kode_lab }}</td>
                         <td>{{ l.nama_lab }}</td>
                         <td>{{ l.gedung|default:'-' }}</td>
                         <td>{{ l.lantai|default:'-' }}</td>
@@ -46,7 +44,7 @@
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="6" class="text-center">Tidak ada data</td></tr>
+                    <tr><td colspan="5" class="text-center">Tidak ada data</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

@@ -8,6 +8,9 @@
         <div class="card shadow">
             <div class="card-header"><h5>{% if object %}Edit Ruangan{% else %}Tambah Ruangan{% endif %}</h5></div>
             <div class="card-body">
+                {% if not object %}
+                <div class="alert alert-info small py-2">Kode Ruangan dibuat otomatis.</div>
+                {% endif %}
                 <form method="post" hx-post="" hx-target="#main-content" hx-select="#main-content">
                     {% csrf_token %}
                     {% for field in form %}

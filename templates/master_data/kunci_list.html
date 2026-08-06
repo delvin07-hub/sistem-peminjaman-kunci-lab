@@ -16,7 +16,7 @@
                 <select name="lab" class="form-select">
                     <option value="">-- Semua Ruangan --</option>
                     {% for lab in lab_list %}
-                    <option value="{{ lab.id }}" {% if request.GET.lab == lab.id|stringformat:'s' %}selected{% endif %}>{{ lab.kode_lab }} - {{ lab.nama_lab }}</option>
+                    <option value="{{ lab.id }}" {% if request.GET.lab == lab.id|stringformat:'s' %}selected{% endif %}>{{ lab.nama_lab }}</option>
                     {% endfor %}
                 </select>
             </div>

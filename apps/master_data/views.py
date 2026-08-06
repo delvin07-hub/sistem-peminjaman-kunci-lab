@@ -1,9 +1,26 @@
+from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from apps.authentication.mixins import AdminRequiredMixin
 from django.db.models import Q
 from .models import Mahasiswa, Dosen, Laboratorium, Kunci
 from .forms import MahasiswaForm, DosenForm, LaboratoriumForm, KunciForm
+
+
+def _next_kode_ruangan():
+    n = 1
+    while Laboratorium.objects.filter(kode_lab=f'R{n}').exists():
+        n += 1
+    return f'R{n}'
+
+
+def _next_nomor_kunci(ruangan):
+    n = 1
+    while Kunci.objects.filter(
+        laboratorium=ruangan, nomor_kunci=f'K{n}'
+    ).exists():
+        n += 1
+    return f'K{n}'
 
 
 class MahasiswaListView(AdminRequiredMixin, ListView):
@@ -110,6 +127,11 @@ class LaboratoriumCreateView(AdminRequiredMixin, CreateView):
     template_name = 'master_data/laboratorium_form.html'
     success_url = reverse_lazy('laboratorium_list')
 
+    def form_valid(self, form):
+        form.instance.kode_lab = _next_kode_ruangan()
+        messages.success(self.request, 'Ruangan berhasil ditambahkan.')
+        return super().form_valid(form)
+
 
 class LaboratoriumUpdateView(AdminRequiredMixin, UpdateView):
     model = Laboratorium
@@ -156,6 +178,13 @@ class KunciCreateView(AdminRequiredMixin, CreateView):
     form_class = KunciForm
     template_name = 'master_data/kunci_form.html'
     success_url = reverse_lazy('kunci_list')
+
+    def form_valid(self, form):
+        form.instance.nomor_kunci = _next_nomor_kunci(
+            form.instance.laboratorium
+        )
+        messages.success(self.request, 'Kunci berhasil ditambahkan.')
+        return super().form_valid(form)
 
 
 class KunciUpdateView(AdminRequiredMixin, UpdateView):

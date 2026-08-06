@@ -27,10 +27,10 @@ class DosenForm(_BootstrapFormMixin, forms.ModelForm):
 class LaboratoriumForm(_BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Laboratorium
-        fields = ['kode_lab', 'nama_lab', 'gedung', 'lantai']
+        fields = ['nama_lab', 'gedung', 'lantai']
 
 
 class KunciForm(_BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Kunci
-        fields = ['laboratorium', 'nomor_kunci']
+        fields = ['laboratorium']
