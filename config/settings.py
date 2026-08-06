@@ -19,11 +19,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'widget_tweaks',
+    'rest_framework',
+    'rest_framework.authtoken',
     'apps.authentication',
     'apps.dashboard',
     'apps.master_data',
     'apps.transaction',
     'apps.report',
+    'apps.notifications',
 ]
 
 MIDDLEWARE = [
@@ -103,4 +106,16 @@ MESSAGE_TAGS = {
     messages.SUCCESS: 'success',
     messages.WARNING: 'warning',
     messages.INFO: 'info',
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
