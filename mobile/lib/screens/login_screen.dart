@@ -28,15 +28,14 @@ class _LoginScreenState extends State<LoginScreen> {
       await ApiService.instance.login(_username.text.trim(), _password.text);
       if (!mounted) return;
       widget.onLogin();
-      final ok = await PushService.registerDeviceToken();
+      final err = await PushService.registerDeviceToken();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            ok
+            err == null
                 ? 'Login berhasil. Notifikasi aktif.'
-                : 'Login berhasil, tetapi notifikasi push tidak aktif '
-                    'di perangkat ini.',
+                : 'Notifikasi push tidak aktif.\nDetail: $err',
           ),
         ),
       );

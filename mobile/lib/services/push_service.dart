@@ -15,6 +15,7 @@ class PushService {
   static final FlutterLocalNotificationsPlugin _local =
       FlutterLocalNotificationsPlugin();
   static String? _fcmToken;
+  static String? _fcmError;
   static final ValueNotifier<RemoteMessage?> onOpenMessage =
       ValueNotifier<RemoteMessage?>(null);
 
@@ -66,22 +67,26 @@ class PushService {
   static Future<String?> refreshToken() async {
     try {
       _fcmToken = await FirebaseMessaging.instance.getToken();
+      _fcmError = null;
     } catch (e) {
       debugPrint('FCM getToken gagal: $e');
       _fcmToken = null;
+      _fcmError = e.toString();
     }
     return _fcmToken;
   }
 
-  static Future<bool> registerDeviceToken() async {
+  static Future<String?> registerDeviceToken() async {
     final token = await refreshToken();
-    if (token == null) return false;
+    if (token == null) {
+      return _fcmError ?? 'FCM token tidak tersedia';
+    }
     try {
       await ApiService.instance.registerDeviceToken(token);
-      return true;
+      return null;
     } catch (e) {
       debugPrint('Registrasi device token gagal: $e');
-      return false;
+      return 'Gagal daftar ke server: $e';
     }
   }
 
