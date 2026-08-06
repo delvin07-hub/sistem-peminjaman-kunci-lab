@@ -7,8 +7,10 @@ import '../api/api_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Saat app di background/tertutup, Android menampilkan notifikasi secara
+  // otomatis dari payload FCM. Handler ini sengaja kosong agar tidak
+  // memunculkan notifikasi ganda.
   await Firebase.initializeApp();
-  await PushService.showLocalNotification(message);
 }
 
 class PushService {

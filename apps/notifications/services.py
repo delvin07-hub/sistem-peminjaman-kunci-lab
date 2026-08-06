@@ -73,10 +73,18 @@ class PushNotifikasiService:
                         token=token,
                     )
                 )
-            except Exception:
-                logger.exception(
-                    'Gagal kirim FCM ke token %s...', token[:20]
+            except Exception as exc:
+                logger.warning(
+                    'Gagal kirim FCM ke token %s...: %s', token[:20], exc
                 )
+                from firebase_admin import exceptions as fb_exc
+                from firebase_admin import messaging as fcm
+
+                if isinstance(
+                    exc, (fcm.UnregisteredError, fb_exc.InvalidArgumentError)
+                ):
+                    DeviceToken.objects.filter(token=token).delete()
+                    logger.info('Device token kadaluarsa dihapus: %s...', token[:20])
 
     @staticmethod
     def kirim_untuk_peminjaman(peminjaman, tipe):

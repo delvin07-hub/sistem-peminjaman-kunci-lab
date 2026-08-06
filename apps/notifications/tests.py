@@ -255,6 +255,8 @@ class PushNotifikasiServiceTest(TestCase):
         )
 
     def test_push_tanpa_key_file_tidak_error(self):
+        from unittest import mock
+
         from .models import DeviceToken, Notifikasi
         from .services import PushNotifikasiService
 
@@ -264,10 +266,40 @@ class PushNotifikasiServiceTest(TestCase):
         notif = Notifikasi.objects.create(
             penanggung_jawab=self.pj, tipe='Dipinjam', pesan='pesan'
         )
-        try:
+        with mock.patch(
+            'apps.notifications.services._get_firebase_app',
+            return_value=mock.Mock(),
+        ):
+            try:
+                PushNotifikasiService.kirim(notif)
+            except Exception as exc:  # pragma: no cover
+                self.fail(f'kirim melempar exception: {exc}')
+
+    def test_token_kadaluarsa_dihapus_saat_kirim_gagal(self):
+        from unittest import mock
+
+        from firebase_admin import exceptions as fb_exc
+
+        from .models import DeviceToken, Notifikasi
+        from .services import PushNotifikasiService
+
+        DeviceToken.objects.create(
+            penanggung_jawab=self.pj, token='fcm-token-dead'
+        )
+        notif = Notifikasi.objects.create(
+            penanggung_jawab=self.pj, tipe='Dipinjam', pesan='pesan'
+        )
+        with mock.patch(
+            'apps.notifications.services._get_firebase_app',
+            return_value=mock.Mock(),
+        ), mock.patch(
+            'firebase_admin.messaging.send',
+            side_effect=fb_exc.InvalidArgumentError('token tidak valid'),
+        ):
             PushNotifikasiService.kirim(notif)
-        except Exception as exc:  # pragma: no cover
-            self.fail(f'kirim melempar exception: {exc}')
+        self.assertFalse(
+            DeviceToken.objects.filter(token='fcm-token-dead').exists()
+        )
 
     def test_hook_buat_tidak_error_tanpa_key(self):
         mhs = Mahasiswa.objects.create(
