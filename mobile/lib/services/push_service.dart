@@ -65,15 +65,20 @@ class PushService {
   }
 
   static Future<String?> refreshToken() async {
-    try {
-      _fcmToken = await FirebaseMessaging.instance.getToken();
-      _fcmError = null;
-    } catch (e) {
-      debugPrint('FCM getToken gagal: $e');
-      _fcmToken = null;
-      _fcmError = e.toString();
+    for (var attempt = 1; attempt <= 3; attempt++) {
+      try {
+        _fcmToken = await FirebaseMessaging.instance.getToken();
+        _fcmError = null;
+        return _fcmToken;
+      } catch (e) {
+        debugPrint('FCM getToken gagal (percobaan $attempt/3): $e');
+        _fcmError = e.toString();
+        if (attempt < 3) {
+          await Future.delayed(Duration(seconds: attempt * 3));
+        }
+      }
     }
-    return _fcmToken;
+    return null;
   }
 
   static Future<String?> registerDeviceToken() async {
