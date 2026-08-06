@@ -64,6 +64,16 @@ Proyek ini dikembangkan menggunakan metode **Prototype** dengan tahapan:
 - **Export ke Excel (.xlsx)**
 - **Export ke CSV**
 
+### 🧑🔧 Penanggung Jawab
+- Role penanggung jawab kunci laboratorium (1–2 orang)
+- Dikelola dari Django Admin (`/admin/`), satu form membuat akun + profil sekaligus
+- Notifikasi otomatis dikirim saat kunci **dipinjam** dan **dikembalikan**
+
+### 📱 Mobile App (API JSON)
+- **REST API** dengan Django REST Framework + Token Authentication
+- Login token, daftar notifikasi, tandai notifikasi dibaca, dan status kunci
+- Siap dikonsumsi aplikasi mobile (Flutter) — lihat `docs/ROADMAP_MOBILE.md`
+
 ---
 
 ## 🛠️ Teknologi
@@ -77,6 +87,7 @@ Proyek ini dikembangkan menggunakan metode **Prototype** dengan tahapan:
 | jQuery | 3.7 | JavaScript library untuk AJAX |
 | Bootstrap Icons | 1.11 | Ikon antarmuka |
 | openpyxl | - | Export laporan ke Excel |
+| Django REST Framework | 3.17 | REST API untuk aplikasi mobile |
 
 ---
 
@@ -85,10 +96,11 @@ Proyek ini dikembangkan menggunakan metode **Prototype** dengan tahapan:
 ```
 sistem-peminjaman-kunci-lab/
 ├── apps/
-│   ├── authentication/     # Login & logout
+│   ├── authentication/     # Login & logout, Penanggung Jawab
 │   ├── dashboard/          # Dashboard & statistik
 │   ├── master_data/        # CRUD Mahasiswa, Dosen, Lab, Kunci
 │   ├── transaction/        # Peminjaman, Pengembalian, Riwayat
+│   ├── notifications/      # Notifikasi + REST API mobile
 │   └── report/             # Laporan & export
 ├── config/                 # Konfigurasi Django (settings, urls)
 ├── static/                 # File statis (CSS, JS)
@@ -170,6 +182,7 @@ Setelah menjalankan `python manage.py seed_data`, akun berikut tersedia:
 | Username | Password | Role |
 |----------|----------|------|
 | admin | admin123 | Superuser (full akses) |
+| pj1 | pj12345 | Penanggung jawab (login mobile/API) |
 
 > **Peringatan:** Ganti password default pada lingkungan produksi!
 
@@ -243,6 +256,29 @@ Login → Dashboard → Kelola Data Master → Peminjaman → Pengembalian → R
 ### 6. Riwayat & Laporan
 - **Riwayat**: Lihat seluruh transaksi, cari berdasarkan NIM/Nama/No Kunci
 - **Laporan**: Filter berdasarkan tanggal, export ke Excel atau CSV
+
+---
+
+## 📱 Aplikasi Mobile (Penanggung Jawab)
+
+Aplikasi mobile untuk penanggung jawab (1–2 orang) membaca notifikasi dan status kunci melalui REST API.
+
+| Fitur | Endpoint |
+|-------|----------|
+| Login (ambil token) | `POST /api/token/` |
+| Daftar notifikasi | `GET /api/notifikasi/` |
+| Tandai dibaca | `PATCH /api/notifikasi/<id>/baca/` |
+| Status kunci | `GET /api/status-kunci/` |
+
+Semua endpoint (kecuali login) memerlukan header `Authorization: Token <token>`.
+Panduan lengkap & contoh respons: **`docs/ROADMAP_MOBILE.md`**.
+
+```bash
+# Contoh login untuk mengambil token
+curl -X POST http://localhost:8000/api/token/ \
+     -H "Content-Type: application/json" \
+     -d '{"username":"pj1","password":"pj12345"}'
+```
 
 ---
 
@@ -327,6 +363,10 @@ Proyek ini dikembangkan menggunakan metode **Prototype** yang terdiri dari 5 tah
 | GET | `/laporan/` | Laporan & export | ✓ |
 | GET | `/transaksi/api/get-mahasiswa/` | API cari mahasiswa (AJAX) | ✓ |
 | GET | `/transaksi/api/get-kunci/` | API filter kunci (AJAX) | ✓ |
+| POST | `/api/token/` | Login API, dapatkan token | ✗ |
+| GET | `/api/notifikasi/` | Daftar notifikasi penanggung jawab | Token |
+| PATCH | `/api/notifikasi/<id>/baca/` | Tandai notifikasi dibaca | Token |
+| GET | `/api/status-kunci/` | Status kunci untuk mobile | Token |
 | GET | `/admin/` | Django Admin | ✓ |
 
 ---
