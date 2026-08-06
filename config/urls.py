@@ -8,4 +8,5 @@ urlpatterns = [
     path('master/', include('apps.master_data.urls')),
     path('transaksi/', include('apps.transaction.urls')),
     path('laporan/', include('apps.report.urls')),
+    path('api/', include('apps.notifications.urls')),
 ]
