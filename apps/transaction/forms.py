@@ -6,9 +6,8 @@ from apps.master_data.models import Kunci
 class PeminjamanForm(forms.ModelForm):
     class Meta:
         model = Peminjaman
-        fields = ['mahasiswa', 'dosen', 'laboratorium', 'kunci', 'jam_pinjam', 'keperluan']
+        fields = ['mahasiswa', 'dosen', 'laboratorium', 'kunci', 'keperluan']
         widgets = {
-            'jam_pinjam': forms.TimeInput(attrs={'type': 'time'}),
             'keperluan': forms.Textarea(attrs={'rows': 3}),
         }
 

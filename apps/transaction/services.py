@@ -14,7 +14,12 @@ class PeminjamanService:
         kunci = data['kunci']
         if kunci.status != 'Tersedia':
             raise ValueError(f"Kunci {kunci.nomor_kunci} sedang dipinjam")
-        peminjaman = Peminjaman.objects.create(**data)
+        now = timezone.localtime()
+        peminjaman = Peminjaman.objects.create(
+            **data,
+            jam_pinjam=now.time(),
+            tanggal_pinjam=now.date(),
+        )
         kunci.status = 'Dipinjam'
         kunci.save()
         NotifikasiService.buat(peminjaman, 'Dipinjam')
@@ -26,7 +31,7 @@ class PeminjamanService:
         peminjaman = Peminjaman.objects.select_related('kunci').get(id=peminjaman_id)
         if peminjaman.status != 'Dipinjam':
             raise ValueError("Peminjaman ini sudah dikembalikan")
-        now = timezone.now()
+        now = timezone.localtime()
         peminjaman.jam_kembali = jam_kembali or now.time()
         peminjaman.tanggal_kembali = now.date()
         peminjaman.status = 'Dikembalikan'

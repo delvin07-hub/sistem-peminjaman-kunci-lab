@@ -1,4 +1,6 @@
-from datetime import date, time
+from datetime import date, datetime, time
+from unittest import mock
+from zoneinfo import ZoneInfo
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -35,7 +37,6 @@ class HookNotifikasiTest(TestCase):
             'dosen': self.dosen,
             'laboratorium': self.lab,
             'kunci': self.kunci,
-            'jam_pinjam': time(9, 0),
             'keperluan': 'Praktikum',
         })
         notif = Notifikasi.objects.get(tipe='Dipinjam')
@@ -48,7 +49,6 @@ class HookNotifikasiTest(TestCase):
             'dosen': self.dosen,
             'laboratorium': self.lab,
             'kunci': self.kunci,
-            'jam_pinjam': time(9, 0),
             'keperluan': 'Praktikum',
         })
         Notifikasi.objects.all().delete()
@@ -116,3 +116,39 @@ class RiwayatFilterTest(TestCase):
         })
         self.assertContains(r, 'Budi')
         self.assertNotContains(r, 'Andi')
+
+
+class JamPinjamOtomatisTest(TestCase):
+    def setUp(self):
+        PenanggungJawab.objects.create(
+            user=User.objects.create_user('pj', password='x'),
+            nama_lengkap='PJ Lab',
+        )
+        self.lab = Laboratorium.objects.create(
+            kode_lab='LK', nama_lab='Lab Kartu'
+        )
+        self.mahasiswa = Mahasiswa.objects.create(
+            nim='2209000', nama='Rina', program_studi='TI'
+        )
+        self.dosen = Dosen.objects.create(nidn='ND9', nama='Dosen D')
+        self.kunci = Kunci.objects.create(
+            laboratorium=self.lab, nomor_kunci='K1', status='Tersedia'
+        )
+
+    def _pinjam(self):
+        return PeminjamanService.pinjam_kunci({
+            'mahasiswa': self.mahasiswa,
+            'dosen': self.dosen,
+            'laboratorium': self.lab,
+            'kunci': self.kunci,
+            'keperluan': 'Praktikum',
+        })
+
+    def test_pinjam_mencatat_jam_dan_tanggal_server(self):
+        fixed = datetime(2026, 8, 6, 14, 32, 5, tzinfo=ZoneInfo('Asia/Jakarta'))
+        with mock.patch(
+            'apps.transaction.services.timezone.now', return_value=fixed
+        ):
+            p = self._pinjam()
+        self.assertEqual(p.tanggal_pinjam, date(2026, 8, 6))
+        self.assertEqual(p.jam_pinjam, time(14, 32, 5))
