@@ -60,29 +60,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-function refreshKunci(labId) {
-    var $kunci = $('#id_kunci');
-    $kunci.empty();
-    $kunci.prop('disabled', !labId);
-    if (labId) {
-        $kunci.append('<option value="">-- Pilih Kunci --</option>');
-        $.getJSON('/transaksi/api/get-kunci/', { lab_id: labId }, function(data) {
-            $.each(data.results, function(i, item) {
-                $kunci.append('<option value="' + item.id + '">' + item.text + '</option>');
-            });
-        });
-    } else {
-        $kunci.append('<option value="">-- Pilih ruangan terlebih dahulu --</option>');
-    }
-}
-$(document).ready(function() {
-    refreshKunci($('#id_laboratorium').val());
-    $('#id_laboratorium').on('change', function() {
-        refreshKunci($(this).val());
-    });
-});
-</script>
-{% endblock %}
