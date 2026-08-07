@@ -8,7 +8,7 @@
     <div class="card-body">
         <form method="get" hx-get="{% url 'riwayat_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="row g-2 mb-3">
             <div class="col-md-4">
-                <input type="text" name="search" class="form-control" placeholder="Cari NIM/Nama/No Kunci..." value="{{ search|default:'' }}">
+                <input type="text" name="search" class="form-control" placeholder="Cari NIM/Nama/No Kunci..." value="{{ search|default:'' }}" hx-get="{% url 'riwayat_list' %}" hx-trigger="keyup changed delay:400ms" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" hx-include="closest form">
             </div>
             <div class="col-md-2">
                 <input type="date" name="tanggal_awal" class="form-control" value="{{ filter_set.form.tanggal_awal.value|default:'' }}">

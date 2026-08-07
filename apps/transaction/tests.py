@@ -31,7 +31,8 @@ class HookNotifikasiTest(TestCase):
             laboratorium=self.lab, nomor_kunci='K1', status='Tersedia'
         )
 
-    def test_pinjam_kunci_membuat_notifikasi_dipinjam(self):
+    @mock.patch('apps.notifications.services._kirim_push_bg')
+    def test_pinjam_kunci_membuat_notifikasi_dipinjam(self, _):
         peminjaman = PeminjamanService.pinjam_kunci({
             'mahasiswa': self.mahasiswa,
             'dosen': self.dosen,
@@ -43,7 +44,8 @@ class HookNotifikasiTest(TestCase):
         self.assertEqual(notif.peminjaman, peminjaman)
         self.assertEqual(notif.penanggung_jawab, self.pj)
 
-    def test_kembalikan_kunci_membuat_notifikasi_dikembalikan(self):
+    @mock.patch('apps.notifications.services._kirim_push_bg')
+    def test_kembalikan_kunci_membuat_notifikasi_dikembalikan(self, _):
         peminjaman = PeminjamanService.pinjam_kunci({
             'mahasiswa': self.mahasiswa,
             'dosen': self.dosen,
@@ -144,7 +146,8 @@ class JamPinjamOtomatisTest(TestCase):
             'keperluan': 'Praktikum',
         })
 
-    def test_pinjam_mencatat_jam_dan_tanggal_server(self):
+    @mock.patch('apps.notifications.services._kirim_push_bg')
+    def test_pinjam_mencatat_jam_dan_tanggal_server(self, _):
         fixed = datetime(2026, 8, 6, 14, 32, 5, tzinfo=ZoneInfo('Asia/Jakarta'))
         with mock.patch(
             'apps.transaction.services.timezone.now', return_value=fixed
@@ -202,7 +205,8 @@ class KunciRuanganValidasiTest(TestCase):
         )
         self.assertFalse(Peminjaman.objects.filter(mahasiswa=self.mahasiswa).exists())
 
-    def test_form_terima_kunci_seruangan(self):
+    @mock.patch('apps.notifications.services._kirim_push_bg')
+    def test_form_terima_kunci_seruangan(self, _):
         response = self._post_form(self.lab_a, self.kunci_a)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Peminjaman.objects.filter(mahasiswa=self.mahasiswa).exists())

@@ -21,7 +21,7 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <input type="text" name="search" class="form-control" placeholder="Cari nomor kunci..." value="{{ request.GET.search }}">
+                <input type="text" name="search" class="form-control" placeholder="Cari nomor kunci..." value="{{ request.GET.search }}" hx-get="{% url 'kunci_list' %}" hx-trigger="keyup changed delay:400ms" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" hx-include="closest form">
             </div>
             <div class="col-md-4">
                 <button class="btn btn-outline-primary" type="submit"><i class="bi bi-filter"></i> Filter</button>

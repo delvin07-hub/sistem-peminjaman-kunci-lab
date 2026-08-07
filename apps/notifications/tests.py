@@ -301,7 +301,7 @@ class PushNotifikasiServiceTest(TestCase):
             DeviceToken.objects.filter(token='fcm-token-dead').exists()
         )
 
-    def test_hook_buat_tidak_error_tanpa_key(self):
+def test_hook_buat_tidak_error_tanpa_key(self):
         mhs = Mahasiswa.objects.create(
             nim='2200004', nama='Eka', program_studi='TI'
         )
@@ -317,6 +317,7 @@ class PushNotifikasiServiceTest(TestCase):
             keperluan='Praktikum',
         )
         try:
-            NotifikasiService.buat(peminjaman, 'Dipinjam')
+            with self.settings(FCM_SERVICE_ACCOUNT_JSON=''):
+                NotifikasiService.buat(peminjaman, 'Dipinjam')
         except Exception as exc:  # pragma: no cover
             self.fail(f'buat melempar exception: {exc}')

@@ -13,7 +13,7 @@
     <div class="card-body">
         <form method="get" hx-get="{% url 'dosen_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="mb-3">
             <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Cari NIDN atau Nama..." value="{{ request.GET.search }}">
+                <input type="text" name="search" class="form-control" placeholder="Cari NIDN atau Nama..." value="{{ request.GET.search }}" hx-get="{% url 'dosen_list' %}" hx-trigger="keyup changed delay:400ms" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" hx-include="closest form">
                 <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
                 {% if request.GET.search %}
                 <a href="{% url 'dosen_list' %}" hx-get="{% url 'dosen_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-outline-secondary">Reset</a>

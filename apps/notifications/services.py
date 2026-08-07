@@ -1,4 +1,5 @@
 import logging
+import threading
 
 from django.conf import settings
 from django.db import transaction
@@ -87,11 +88,26 @@ class PushNotifikasiService:
                     logger.info('Device token kadaluarsa dihapus: %s...', token[:20])
 
     @staticmethod
-    def kirim_untuk_peminjaman(peminjaman, tipe):
-        for notifikasi in Notifikasi.objects.filter(
-            peminjaman=peminjaman, tipe=tipe
-        ):
-            PushNotifikasiService.kirim(notifikasi)
+    def kirim_untuk_peminjaman(peminjaman_id, tipe):
+        try:
+            for notifikasi in Notifikasi.objects.filter(
+                peminjaman_id=peminjaman_id, tipe=tipe
+            ):
+                PushNotifikasiService.kirim(notifikasi)
+        except Exception:
+            logger.exception(
+                'Gagal mengirim push untuk peminjaman %s (%s)',
+                peminjaman_id, tipe,
+            )
+
+
+def _kirim_push_bg(peminjaman_id, tipe):
+    """Mulai pengiriman push FCM di thread latar belakang (daemon)."""
+    threading.Thread(
+        target=PushNotifikasiService.kirim_untuk_peminjaman,
+        args=(peminjaman_id, tipe),
+        daemon=True,
+    ).start()
 
 
 class NotifikasiService:
@@ -106,9 +122,7 @@ class NotifikasiService:
                 pesan=pesan,
             )
         transaction.on_commit(
-            lambda: PushNotifikasiService.kirim_untuk_peminjaman(
-                peminjaman, tipe
-            )
+            lambda: _kirim_push_bg(peminjaman.id, tipe)
         )
 
     @staticmethod

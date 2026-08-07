@@ -40,5 +40,5 @@ timeout /t 3 /nobreak >nul
 start http://localhost:8000
 
 :: Jalankan server produksi.
-waitress-serve --listen=0.0.0.0:8000 config.wsgi:application
+waitress-serve --listen=0.0.0.0:8000 --threads=8 config.wsgi:application
 pause
