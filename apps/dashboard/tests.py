@@ -27,16 +27,13 @@ class DashboardTest(TestCase):
             keperluan='Praktikum',
         )
 
-    def test_dashboard_aktivitas_hari_ini(self):
+    def test_dashboard_aktivitas_hari_ini_tanpa_grafik(self):
         response = self.client.get(reverse('dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Aktivitas Hari Ini')
         self.assertContains(response, 'Ani')
-
-    def test_dashboard_chart_data_hadir(self):
-        response = self.client.get(reverse('dashboard'))
-        self.assertContains(response, 'chart-7hari')
-        self.assertContains(response, 'chart-ruangan')
+        self.assertNotContains(response, 'chart-7hari')
+        self.assertNotContains(response, 'chart-ruangan')
 
     def test_aktivitas_lama_tidak_tampil(self):
         lama = timezone.localdate() - timezone.timedelta(days=5)
