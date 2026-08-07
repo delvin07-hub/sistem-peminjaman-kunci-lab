@@ -4,7 +4,6 @@ import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
 from apps.authentication.mixins import admin_required
-from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -61,7 +60,7 @@ def _peminjaman_to_row(i, p):
         p.mahasiswa.program_studi,
         p.dosen.nama,
         f'{p.laboratorium.kode_lab} - {p.laboratorium.nama_lab}',
-        p.kunci.nomor_kunci,
+        p.kunci.nomor_kunci if p.kunci else '-',
         _fmt_time(p.jam_pinjam),
         _fmt_date(p.tanggal_kembali),
         _fmt_time(p.jam_kembali),
@@ -77,11 +76,8 @@ def laporan_view(request):
     total = peminjaman.count()
     dipinjam = peminjaman.filter(status='Dipinjam').count()
 
-    paginator = Paginator(peminjaman, 50)
-    page_obj = paginator.get_page(request.GET.get('page'))
-
     context = {
-        'page_obj': page_obj,
+        'data': peminjaman,
         'total': total,
         'dipinjam': dipinjam,
         'dikembalikan': total - dipinjam,

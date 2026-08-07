@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from apps.authentication.mixins import AdminRequiredMixin
@@ -23,11 +24,21 @@ def _next_nomor_kunci(ruangan):
     return f'K{n}'
 
 
+def _renumber_kunci(ruangan):
+    """Renumber semua kunci ruangan jadi kontigu K1..Kn (urut id)."""
+    daftar = list(Kunci.objects.filter(laboratorium=ruangan).order_by('id'))
+    for i, k in enumerate(daftar, start=1):
+        k.nomor_kunci = f'TMP{i}'
+        k.save(update_fields=['nomor_kunci'])
+    for i, k in enumerate(daftar, start=1):
+        k.nomor_kunci = f'K{i}'
+        k.save(update_fields=['nomor_kunci'])
+
+
 class MahasiswaListView(AdminRequiredMixin, ListView):
     model = Mahasiswa
     template_name = 'master_data/mahasiswa_list.html'
     context_object_name = 'data'
-    paginate_by = 10
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -68,7 +79,6 @@ class DosenListView(AdminRequiredMixin, ListView):
     model = Dosen
     template_name = 'master_data/dosen_list.html'
     context_object_name = 'data'
-    paginate_by = 10
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -109,7 +119,6 @@ class LaboratoriumListView(AdminRequiredMixin, ListView):
     model = Laboratorium
     template_name = 'master_data/laboratorium_list.html'
     context_object_name = 'data'
-    paginate_by = 10
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -155,7 +164,6 @@ class KunciListView(AdminRequiredMixin, ListView):
     model = Kunci
     template_name = 'master_data/kunci_list.html'
     context_object_name = 'data'
-    paginate_by = 10
 
     def get_queryset(self):
         qs = super().get_queryset().select_related('laboratorium')
@@ -203,3 +211,31 @@ class KunciDeleteView(AdminRequiredMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         context['cancel_url'] = reverse_lazy('kunci_list')
         return context
+
+    def _cegah_hapus(self, request):
+        obj = self.get_object()
+        if obj.status == 'Dipinjam':
+            messages.error(
+                request,
+                f"Kunci {obj.nomor_kunci} sedang dipinjam, tidak dapat dihapus."
+            )
+            return True
+        return False
+
+    def get(self, request, *args, **kwargs):
+        if self._cegah_hapus(request):
+            return redirect('kunci_list')
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        if self._cegah_hapus(self.request):
+            return redirect('kunci_list')
+        self.object = self.get_object()
+        ruangan = self.object.laboratorium
+        success_url = self.get_success_url()
+        self.object.delete()
+        _renumber_kunci(ruangan)
+        messages.success(
+            self.request, 'Kunci berhasil dihapus dan penomoran diperbarui.'
+        )
+        return redirect(success_url)

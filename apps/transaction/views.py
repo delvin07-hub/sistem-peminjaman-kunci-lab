@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -110,11 +109,8 @@ def riwayat_list(request):
     filter_set = PeminjamanFilter(request.GET, queryset=qs)
     qs = filter_set.qs
 
-    paginator = Paginator(qs, 10)
-    page_obj = paginator.get_page(request.GET.get('page'))
-
     return render(request, 'transaction/riwayat_list.html', {
-        'page_obj': page_obj,
+        'data': qs,
         'filter_set': filter_set,
         'search': search,
         'status_filter': request.GET.get('status', ''),
@@ -129,7 +125,7 @@ def search(request):
             'id': p.id,
             'mahasiswa': p.mahasiswa.nama,
             'nim': p.mahasiswa.nim,
-            'kunci': p.kunci.nomor_kunci,
+            'kunci': p.kunci.nomor_kunci if p.kunci else '-',
             'lab': p.laboratorium.nama_lab,
             'tgl': str(p.tanggal_pinjam),
             'status': p.status,

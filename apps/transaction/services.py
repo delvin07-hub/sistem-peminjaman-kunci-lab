@@ -41,7 +41,8 @@ class PeminjamanService:
         peminjaman.tanggal_kembali = now.date()
         peminjaman.status = 'Dikembalikan'
         peminjaman.save()
-        peminjaman.kunci.status = 'Tersedia'
-        peminjaman.kunci.save()
+        if peminjaman.kunci is not None:
+            peminjaman.kunci.status = 'Tersedia'
+            peminjaman.kunci.save()
         NotifikasiService.buat(peminjaman, 'Dikembalikan')
         return peminjaman

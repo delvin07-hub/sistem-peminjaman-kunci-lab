@@ -8,9 +8,6 @@
         <div class="card shadow">
             <div class="card-header"><h5>{% if object %}Edit Kunci{% else %}Tambah Kunci{% endif %}</h5></div>
             <div class="card-body">
-                {% if not object %}
-                <div class="alert alert-info small py-2">Nomor Kunci dibuat otomatis (K1, K2, ... per ruangan).</div>
-                {% endif %}
                 <form method="post" hx-post="" hx-target="#main-content" hx-select="#main-content">
                     {% csrf_token %}
                     {% for field in form %}

@@ -63,7 +63,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ p.mahasiswa.nama }}</td>
-                        <td>{{ p.kunci.nomor_kunci }}</td>
+                        <td>{{ p.kunci.nomor_kunci|default:'-' }}</td>
                         <td>{{ p.laboratorium.nama_lab }}</td>
                         <td>{{ p.jam_pinjam }}</td>
                         <td>

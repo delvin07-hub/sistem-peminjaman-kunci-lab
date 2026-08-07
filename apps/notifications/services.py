@@ -128,14 +128,15 @@ class NotifikasiService:
     @staticmethod
     def _bentuk_pesan(peminjaman, tipe):
         kunci = peminjaman.kunci
+        nome = kunci.nomor_kunci if kunci else '-'
         lab = peminjaman.laboratorium
         mhs = peminjaman.mahasiswa
         if tipe == 'Dipinjam':
             return (
-                f'{mhs.nama} meminjam kunci {kunci.nomor_kunci}'
+                f'{mhs.nama} meminjam kunci {nome}'
                 f' ({lab.nama_lab}) jam {peminjaman.jam_pinjam}'
             )
         return (
-            f'{mhs.nama} mengembalikan kunci {kunci.nomor_kunci}'
+            f'{mhs.nama} mengembalikan kunci {nome}'
             f' ({lab.nama_lab})'
         )

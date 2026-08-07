@@ -61,3 +61,30 @@ class KodeOtomatisTest(TestCase):
         )
         self.assertEqual(sorted(nomor_lab1), ['K1', 'K2'])
         self.assertEqual(nomor_lab2, ['K1'])
+
+    def test_hapus_kunci_renumber_otomatis(self):
+        lab = Laboratorium.objects.create(
+            kode_lab='R1', nama_lab='Aula'
+        )
+        for n in ['K1', 'K2', 'K3']:
+            Kunci.objects.create(laboratorium=lab, nomor_kunci=n)
+        k2 = Kunci.objects.get(nomor_kunci='K2')
+        response = self.client.post(reverse('kunci_delete', args=[k2.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Kunci.objects.filter(id=k2.id).exists())
+        sisa = sorted(
+            Kunci.objects.filter(laboratorium=lab)
+            .values_list('nomor_kunci', flat=True)
+        )
+        self.assertEqual(sisa, ['K1', 'K2'])
+
+    def test_hapus_kunci_dipinjam_ditolak(self):
+        lab = Laboratorium.objects.create(
+            kode_lab='R1', nama_lab='Aula'
+        )
+        k = Kunci.objects.create(
+            laboratorium=lab, nomor_kunci='K1', status='Dipinjam'
+        )
+        response = self.client.post(reverse('kunci_delete', args=[k.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Kunci.objects.filter(id=k.id).exists())

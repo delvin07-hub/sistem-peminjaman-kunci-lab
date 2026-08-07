@@ -43,7 +43,6 @@ class PenanggungJawabListView(AdminRequiredMixin, ListView):
     model = PenanggungJawab
     template_name = 'authentication/penanggung_jawab_list.html'
     context_object_name = 'data'
-    paginate_by = 10
 
     def get_queryset(self):
         qs = super().get_queryset().select_related('user')

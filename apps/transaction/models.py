@@ -20,7 +20,8 @@ class Peminjaman(models.Model):
         verbose_name='Ruangan'
     )
     kunci = models.ForeignKey(
-        Kunci, on_delete=models.CASCADE, related_name='peminjaman'
+        Kunci, on_delete=models.SET_NULL, related_name='peminjaman',
+        null=True, verbose_name='Kunci'
     )
     tanggal_pinjam = models.DateField(default=timezone.localdate)
     jam_pinjam = models.TimeField()
