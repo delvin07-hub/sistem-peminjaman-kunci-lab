@@ -4,9 +4,14 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4><i class="bi bi-person-badge-fill"></i> Data Dosen</h4>
-    <a href="{% url 'dosen_create' %}" hx-get="{% url 'dosen_create' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Tambah Dosen
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{% url 'dosen_import' %}" hx-get="{% url 'dosen_import' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-outline-success">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Import Excel
+        </a>
+        <a href="{% url 'dosen_create' %}" hx-get="{% url 'dosen_create' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Tambah Dosen
+        </a>
+    </div>
 </div>
 
 <div class="card shadow">

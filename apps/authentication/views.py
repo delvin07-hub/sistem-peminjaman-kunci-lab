@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.db.models import Q
 from django.urls import reverse_lazy
@@ -32,11 +33,25 @@ def login_view(request):
     return render(request, 'authentication/login.html')
 
 
-@admin_required
 def logout_view(request):
     logout(request)
     messages.info(request, 'Anda telah logout.')
     return redirect('login')
+
+
+@admin_required
+def ubah_password_view(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Password berhasil diubah.')
+            return redirect('dashboard')
+        messages.error(request, 'Periksa kembali form password.')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'authentication/ubah_password.html', {'form': form})
 
 
 class PenanggungJawabListView(AdminRequiredMixin, ListView):

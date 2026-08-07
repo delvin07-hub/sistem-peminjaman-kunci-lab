@@ -12,19 +12,19 @@
                 <table class="table table-bordered">
                     <tr>
                         <th style="width:200px">Mahasiswa</th>
-                        <td>{{ p.mahasiswa.nama }} ({{ p.mahasiswa.nim }})</td>
+                        <td>{% if p.mahasiswa %}{{ p.mahasiswa.nama }} ({{ p.mahasiswa.nim }}){% else %}-{% endif %}</td>
                     </tr>
                     <tr>
                         <th>Program Studi</th>
-                        <td>{{ p.mahasiswa.program_studi }}</td>
+                        <td>{{ p.mahasiswa.program_studi|default:'-' }}</td>
                     </tr>
                     <tr>
                         <th>Dosen</th>
-                        <td>{{ p.dosen.nama }}</td>
+                        <td>{{ p.dosen.nama|default:'-' }}</td>
                     </tr>
                     <tr>
                         <th>Ruangan</th>
-                        <td>{{ p.laboratorium.nama_lab }}</td>
+                        <td>{{ p.laboratorium.nama_lab|default:'-' }}</td>
                     </tr>
                     <tr>
                         <th>Kunci</th>

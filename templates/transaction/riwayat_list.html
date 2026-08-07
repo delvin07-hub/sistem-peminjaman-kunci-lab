@@ -24,6 +24,30 @@
                 </select>
             </div>
             <div class="col-md-2">
+                <select name="ruangan" class="form-select">
+                    <option value="">-- Semua Ruangan --</option>
+                    {% for lab in lab_list %}
+                    <option value="{{ lab.id }}" {% if request.GET.ruangan == lab.id|stringformat:'s' %}selected{% endif %}>{{ lab.kode_lab }} - {{ lab.nama_lab }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="dosen" class="form-select">
+                    <option value="">-- Semua Dosen --</option>
+                    {% for d in dosen_list %}
+                    <option value="{{ d.id }}" {% if request.GET.dosen == d.id|stringformat:'s' %}selected{% endif %}>{{ d.nama }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="prodi" class="form-select">
+                    <option value="">-- Semua Prodi --</option>
+                    {% for p in prodi_list %}
+                    <option value="{{ p }}" {% if request.GET.prodi == p %}selected{% endif %}>{{ p }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
                 <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
                 <a href="{% url 'riwayat_list' %}" hx-get="{% url 'riwayat_list' %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="btn btn-outline-secondary">Reset</a>
             </div>
@@ -48,9 +72,9 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ p.tanggal_pinjam|date:'d/m/Y' }}</td>
-                        <td>{{ p.mahasiswa.nama }}<br><small class="text-muted">{{ p.mahasiswa.nim }}</small></td>
+                        <td>{% if p.mahasiswa %}{{ p.mahasiswa.nama }}<br><small class="text-muted">{{ p.mahasiswa.nim }}</small>{% else %}-{% endif %}</td>
                         <td>{{ p.kunci.nomor_kunci|default:'-' }}</td>
-                        <td>{{ p.laboratorium.nama_lab }}</td>
+                        <td>{{ p.laboratorium.nama_lab|default:'-' }}</td>
                         <td>{{ p.jam_pinjam }}</td>
                         <td>
                             {% if p.jam_kembali %}

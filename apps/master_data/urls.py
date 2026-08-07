@@ -6,11 +6,15 @@ urlpatterns = [
     path('mahasiswa/tambah/', views.MahasiswaCreateView.as_view(), name='mahasiswa_create'),
     path('mahasiswa/edit/<int:pk>/', views.MahasiswaUpdateView.as_view(), name='mahasiswa_update'),
     path('mahasiswa/hapus/<int:pk>/', views.MahasiswaDeleteView.as_view(), name='mahasiswa_delete'),
+    path('mahasiswa/impor/', views.impor_mahasiswa_view, name='mahasiswa_import'),
+    path('mahasiswa/impor/template/', views.template_mahasiswa_view, name='mahasiswa_import_template'),
 
     path('dosen/', views.DosenListView.as_view(), name='dosen_list'),
     path('dosen/tambah/', views.DosenCreateView.as_view(), name='dosen_create'),
     path('dosen/edit/<int:pk>/', views.DosenUpdateView.as_view(), name='dosen_update'),
     path('dosen/hapus/<int:pk>/', views.DosenDeleteView.as_view(), name='dosen_delete'),
+    path('dosen/impor/', views.impor_dosen_view, name='dosen_import'),
+    path('dosen/impor/template/', views.template_dosen_view, name='dosen_import_template'),
 
     path('laboratorium/', views.LaboratoriumListView.as_view(), name='laboratorium_list'),
     path('laboratorium/tambah/', views.LaboratoriumCreateView.as_view(), name='laboratorium_create'),

@@ -40,12 +40,39 @@
                 <label class="form-label">Tanggal Akhir</label>
                 <input type="date" name="tgl_akhir" class="form-control" value="{{ tgl_akhir }}">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <label class="form-label">Ruangan</label>
+                <select name="ruangan" class="form-select">
+                    <option value="">-- Semua --</option>
+                    {% for lab in lab_list %}
+                    <option value="{{ lab.id }}" {% if ruangan_filter == lab.id|stringformat:'s' %}selected{% endif %}>{{ lab.kode_lab }} - {{ lab.nama_lab }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Dosen</label>
+                <select name="dosen" class="form-select">
+                    <option value="">-- Semua --</option>
+                    {% for d in dosen_list %}
+                    <option value="{{ d.id }}" {% if dosen_filter == d.id|stringformat:'s' %}selected{% endif %}>{{ d.nama }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
                     <option value="">-- Semua --</option>
                     <option value="Dipinjam" {% if status_filter == 'Dipinjam' %}selected{% endif %}>Dipinjam</option>
                     <option value="Dikembalikan" {% if status_filter == 'Dikembalikan' %}selected{% endif %}>Dikembalikan</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Program Studi</label>
+                <select name="prodi" class="form-select">
+                    <option value="">-- Semua --</option>
+                    {% for p in prodi_list %}
+                    <option value="{{ p }}" {% if prodi_filter == p %}selected{% endif %}>{{ p }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="col-md-3 d-flex align-items-end">
@@ -57,10 +84,10 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="text-muted">Menampilkan {{ data|length }} dari {{ total }} transaksi</span>
             <div>
-                <a href="{% url 'report_export_excel' %}?{% if tgl_awal %}tgl_awal={{ tgl_awal }}&{% endif %}{% if tgl_akhir %}tgl_akhir={{ tgl_akhir }}&{% endif %}{% if status_filter %}status={{ status_filter }}{% endif %}" hx-boost="false" class="btn btn-success btn-sm">
+                <a href="{% url 'report_export_excel' %}?{% if tgl_awal %}tgl_awal={{ tgl_awal }}&{% endif %}{% if tgl_akhir %}tgl_akhir={{ tgl_akhir }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if ruangan_filter %}ruangan={{ ruangan_filter }}&{% endif %}{% if dosen_filter %}dosen={{ dosen_filter }}&{% endif %}{% if prodi_filter %}prodi={{ prodi_filter }}{% endif %}" hx-boost="false" class="btn btn-success btn-sm">
                     <i class="bi bi-file-earmark-excel"></i> Export Excel
                 </a>
-                <a href="{% url 'report_export_csv' %}?{% if tgl_awal %}tgl_awal={{ tgl_awal }}&{% endif %}{% if tgl_akhir %}tgl_akhir={{ tgl_akhir }}&{% endif %}{% if status_filter %}status={{ status_filter }}{% endif %}" hx-boost="false" class="btn btn-secondary btn-sm">
+                <a href="{% url 'report_export_csv' %}?{% if tgl_awal %}tgl_awal={{ tgl_awal }}&{% endif %}{% if tgl_akhir %}tgl_akhir={{ tgl_akhir }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if ruangan_filter %}ruangan={{ ruangan_filter }}&{% endif %}{% if dosen_filter %}dosen={{ dosen_filter }}&{% endif %}{% if prodi_filter %}prodi={{ prodi_filter }}{% endif %}" hx-boost="false" class="btn btn-secondary btn-sm">
                     <i class="bi bi-file-earmark-text"></i> Export CSV
                 </a>
             </div>
@@ -87,10 +114,10 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ p.tanggal_pinjam|date:'d/m/Y' }}</td>
-                        <td>{{ p.mahasiswa.nama }}</td>
-                        <td>{{ p.mahasiswa.nim }}</td>
-                        <td>{{ p.dosen.nama }}</td>
-                        <td>{{ p.laboratorium.nama_lab }}</td>
+                        <td>{% if p.mahasiswa %}{{ p.mahasiswa.nama }}{% else %}-{% endif %}</td>
+                        <td>{{ p.mahasiswa.nim|default:'-' }}</td>
+                        <td>{{ p.dosen.nama|default:'-' }}</td>
+                        <td>{{ p.laboratorium.nama_lab|default:'-' }}</td>
                         <td>{{ p.kunci.nomor_kunci|default:'-' }}</td>
                         <td>{{ p.jam_pinjam|time:'H:i' }}</td>
                         <td>{{ p.jam_kembali|time:'H:i'|default:'-' }}</td>

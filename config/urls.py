@@ -7,4 +7,8 @@ urlpatterns = [
     path('transaksi/', include('apps.transaction.urls')),
     path('laporan/', include('apps.report.urls')),
     path('api/', include('apps.notifications.urls')),
+    path(
+        'notifikasi-log/',
+        include('apps.notifications.web_urls'),
+    ),
 ]

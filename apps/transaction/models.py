@@ -10,14 +10,15 @@ class Peminjaman(models.Model):
     ]
 
     mahasiswa = models.ForeignKey(
-        Mahasiswa, on_delete=models.CASCADE, related_name='peminjaman'
+        Mahasiswa, on_delete=models.SET_NULL, related_name='peminjaman',
+        null=True
     )
     dosen = models.ForeignKey(
-        Dosen, on_delete=models.CASCADE, related_name='peminjaman'
+        Dosen, on_delete=models.SET_NULL, related_name='peminjaman', null=True
     )
     laboratorium = models.ForeignKey(
-        Laboratorium, on_delete=models.CASCADE, related_name='peminjaman',
-        verbose_name='Ruangan'
+        Laboratorium, on_delete=models.SET_NULL, related_name='peminjaman',
+        null=True, verbose_name='Ruangan'
     )
     kunci = models.ForeignKey(
         Kunci, on_delete=models.SET_NULL, related_name='peminjaman',
@@ -39,4 +40,6 @@ class Peminjaman(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.mahasiswa.nama} - {self.kunci} ({self.tanggal_pinjam})"
+        mhs = self.mahasiswa.nama if self.mahasiswa else '-'
+        kunci = str(self.kunci) if self.kunci else '-'
+        return f"{mhs} - {kunci} ({self.tanggal_pinjam})"

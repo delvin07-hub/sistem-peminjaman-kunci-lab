@@ -10,7 +10,7 @@ from .forms import PeminjamanForm
 from .filters import PeminjamanFilter
 from .models import Peminjaman
 from .services import PeminjamanService
-from apps.master_data.models import Kunci, Mahasiswa
+from apps.master_data.models import Kunci, Mahasiswa, Dosen, Laboratorium
 
 
 def _search_peminjaman_q(term):
@@ -29,7 +29,14 @@ def peminjaman_create(request):
         if form.is_valid():
             try:
                 PeminjamanService.pinjam_kunci(form.cleaned_data)
-                messages.success(request, 'Peminjaman berhasil dicatat!')
+                mhs = form.cleaned_data['mahasiswa']
+                kunci = form.cleaned_data['kunci']
+                jam = timezone.localtime().strftime('%H:%M')
+                messages.success(
+                    request,
+                    f'Peminjaman berhasil dicatat! {mhs.nama} meminjam kunci '
+                    f'{kunci.nomor_kunci} pukul {jam}.',
+                )
                 return redirect('peminjaman_create')
             except ValueError as e:
                 messages.error(request, str(e))
@@ -114,6 +121,13 @@ def riwayat_list(request):
         'filter_set': filter_set,
         'search': search,
         'status_filter': request.GET.get('status', ''),
+        'lab_list': Laboratorium.objects.all(),
+        'dosen_list': Dosen.objects.all(),
+        'prodi_list': list(
+            Mahasiswa.objects.exclude(program_studi='')
+            .values_list('program_studi', flat=True)
+            .distinct().order_by('program_studi')
+        ),
     })
 
 
@@ -123,10 +137,10 @@ def search(request):
     data = [
         {
             'id': p.id,
-            'mahasiswa': p.mahasiswa.nama,
-            'nim': p.mahasiswa.nim,
+            'mahasiswa': p.mahasiswa.nama if p.mahasiswa else '-',
+            'nim': p.mahasiswa.nim if p.mahasiswa else '-',
             'kunci': p.kunci.nomor_kunci if p.kunci else '-',
-            'lab': p.laboratorium.nama_lab,
+            'lab': p.laboratorium.nama_lab if p.laboratorium else '-',
             'tgl': str(p.tanggal_pinjam),
             'status': p.status,
         }

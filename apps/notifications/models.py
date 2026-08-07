@@ -21,6 +21,14 @@ class Notifikasi(models.Model):
     )
     tipe = models.CharField(max_length=20, choices=JENIS)
     pesan = models.CharField(max_length=255)
+    STATUS_PENGIRIMAN = [
+        ('Menunggu', 'Menunggu'),
+        ('Terkirim', 'Terkirim'),
+        ('Gagal', 'Gagal'),
+    ]
+    status = models.CharField(
+        max_length=10, choices=STATUS_PENGIRIMAN, default='Menunggu'
+    )
     dibaca = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

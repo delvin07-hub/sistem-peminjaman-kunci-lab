@@ -125,3 +125,35 @@ class PenanggungJawabWebTest(TestCase):
         response = self.client.get(reverse('penanggung_jawab_list'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Budi Penanggung')
+
+
+class UbahPasswordTest(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            'root', 'r@x.com', 'pw'
+        )
+        self.client.force_login(self.admin)
+
+    def test_halaman_ubah_password_200(self):
+        response = self.client.get(reverse('ubah_password'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_ubah_password_berhasil(self):
+        response = self.client.post(reverse('ubah_password'), {
+            'old_password': 'pw',
+            'new_password1': 'passwordbaru123',
+            'new_password2': 'passwordbaru123',
+        })
+        self.assertRedirects(response, reverse('dashboard'))
+        self.admin.refresh_from_db()
+        self.assertTrue(self.admin.check_password('passwordbaru123'))
+
+    def test_ubah_password_password_lama_salah(self):
+        response = self.client.post(reverse('ubah_password'), {
+            'old_password': 'salah',
+            'new_password1': 'passwordbaru123',
+            'new_password2': 'passwordbaru123',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.admin.refresh_from_db()
+        self.assertTrue(self.admin.check_password('pw'))

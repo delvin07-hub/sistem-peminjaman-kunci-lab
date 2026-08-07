@@ -57,9 +57,15 @@ class PushNotifikasiService:
             'peminjaman_id': str(peminjaman.id) if peminjaman else '',
             'pesan': notifikasi.pesan,
         }
-        token_ids = notifikasi.penanggung_jawab.device_tokens.values_list(
-            'token', flat=True
+        token_ids = list(
+            notifikasi.penanggung_jawab.device_tokens.values_list(
+                'token', flat=True
+            )
         )
+        if not token_ids:
+            Notifikasi.objects.filter(pk=notifikasi.pk).update(status='Gagal')
+            return
+        berhasil = 0
         for token in token_ids:
             try:
                 messaging.send(
@@ -74,6 +80,7 @@ class PushNotifikasiService:
                         token=token,
                     )
                 )
+                berhasil += 1
             except Exception as exc:
                 logger.warning(
                     'Gagal kirim FCM ke token %s...: %s', token[:20], exc
@@ -86,6 +93,8 @@ class PushNotifikasiService:
                 ):
                     DeviceToken.objects.filter(token=token).delete()
                     logger.info('Device token kadaluarsa dihapus: %s...', token[:20])
+        new_status = 'Terkirim' if berhasil == len(token_ids) else 'Gagal'
+        Notifikasi.objects.filter(pk=notifikasi.pk).update(status=new_status)
 
     @staticmethod
     def kirim_untuk_peminjaman(peminjaman_id, tipe):
@@ -131,12 +140,14 @@ class NotifikasiService:
         nome = kunci.nomor_kunci if kunci else '-'
         lab = peminjaman.laboratorium
         mhs = peminjaman.mahasiswa
+        mhs_nama = mhs.nama if mhs else '-'
+        lab_nama = lab.nama_lab if lab else '-'
         if tipe == 'Dipinjam':
             return (
-                f'{mhs.nama} meminjam kunci {nome}'
-                f' ({lab.nama_lab}) jam {peminjaman.jam_pinjam}'
+                f'{mhs_nama} meminjam kunci {nome}'
+                f' ({lab_nama}) jam {peminjaman.jam_pinjam}'
             )
         return (
-            f'{mhs.nama} mengembalikan kunci {nome}'
-            f' ({lab.nama_lab})'
+            f'{mhs_nama} mengembalikan kunci {nome}'
+            f' ({lab_nama})'
         )

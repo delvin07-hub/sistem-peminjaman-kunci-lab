@@ -9,6 +9,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from apps.transaction.models import Peminjaman
+from apps.master_data.models import Dosen, Laboratorium, Mahasiswa
 
 EXPORT_HEADERS = [
     'No', 'Tanggal Pinjam', 'NIM', 'Nama Mahasiswa',
@@ -31,6 +32,9 @@ def _get_filtered_data(request):
     tgl_awal = request.GET.get('tgl_awal')
     tgl_akhir = request.GET.get('tgl_akhir')
     status = request.GET.get('status')
+    ruangan = request.GET.get('ruangan')
+    dosen = request.GET.get('dosen')
+    prodi = request.GET.get('prodi')
 
     if tgl_awal:
         qs = qs.filter(tanggal_pinjam__gte=tgl_awal)
@@ -38,8 +42,14 @@ def _get_filtered_data(request):
         qs = qs.filter(tanggal_pinjam__lte=tgl_akhir)
     if status:
         qs = qs.filter(status=status)
+    if ruangan:
+        qs = qs.filter(laboratorium_id=ruangan)
+    if dosen:
+        qs = qs.filter(dosen_id=dosen)
+    if prodi:
+        qs = qs.filter(mahasiswa__program_studi__icontains=prodi)
 
-    return qs, tgl_awal, tgl_akhir, status
+    return qs, tgl_awal, tgl_akhir, status, ruangan, dosen, prodi
 
 
 def _fmt_date(d):
@@ -49,17 +59,26 @@ def _fmt_date(d):
 def _fmt_time(t):
     return str(t)[:5] if t else '-'
 
+def _prodi_list():
+    return list(
+        Mahasiswa.objects.exclude(program_studi='')
+        .values_list('program_studi', flat=True)
+        .distinct().order_by('program_studi')
+    )
+
 
 def _peminjaman_to_row(i, p):
     """Konversi satu record Peminjaman jadi list untuk export."""
+    mhs = p.mahasiswa
+    lab = p.laboratorium
     return [
         i,
         _fmt_date(p.tanggal_pinjam),
-        p.mahasiswa.nim,
-        p.mahasiswa.nama,
-        p.mahasiswa.program_studi,
-        p.dosen.nama,
-        f'{p.laboratorium.kode_lab} - {p.laboratorium.nama_lab}',
+        mhs.nim if mhs else '-',
+        mhs.nama if mhs else '-',
+        mhs.program_studi if mhs else '-',
+        p.dosen.nama if p.dosen else '-',
+        f'{lab.kode_lab} - {lab.nama_lab}' if lab else '-',
         p.kunci.nomor_kunci if p.kunci else '-',
         _fmt_time(p.jam_pinjam),
         _fmt_date(p.tanggal_kembali),
@@ -71,7 +90,8 @@ def _peminjaman_to_row(i, p):
 
 @admin_required
 def laporan_view(request):
-    peminjaman, tgl_awal, tgl_akhir, status = _get_filtered_data(request)
+    peminjaman, tgl_awal, tgl_akhir, status, ruangan, dosen, prodi = \
+        _get_filtered_data(request)
 
     total = peminjaman.count()
     dipinjam = peminjaman.filter(status='Dipinjam').count()
@@ -84,13 +104,19 @@ def laporan_view(request):
         'tgl_awal': tgl_awal,
         'tgl_akhir': tgl_akhir,
         'status_filter': status,
+        'ruangan_filter': ruangan,
+        'dosen_filter': dosen,
+        'prodi_filter': prodi,
+        'lab_list': Laboratorium.objects.all(),
+        'dosen_list': Dosen.objects.all(),
+        'prodi_list': _prodi_list(),
     }
     return render(request, 'report/laporan.html', context)
 
 
 @admin_required
 def export_excel(request):
-    peminjaman, _, _, _ = _get_filtered_data(request)
+    peminjaman, _, _, _, _, _, _ = _get_filtered_data(request)
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -130,7 +156,7 @@ def export_excel(request):
 
 @admin_required
 def export_csv(request):
-    peminjaman, _, _, _ = _get_filtered_data(request)
+    peminjaman, _, _, _, _, _, _ = _get_filtered_data(request)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="laporan_peminjaman_{timezone.now().date()}.csv"'

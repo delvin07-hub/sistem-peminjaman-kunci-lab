@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
@@ -41,9 +42,32 @@
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Peminjaman 7 Hari Terakhir</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="chart-7hari" height="90"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Peminjaman per Ruangan</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="chart-ruangan" height="170"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card shadow">
     <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Aktivitas Terbaru</h5>
+        <h5 class="mb-0"><i class="bi bi-calendar-day"></i> Aktivitas Hari Ini ({{ tanggal_hari_ini }})</h5>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -59,12 +83,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for p in peminjaman_terbaru %}
+                    {% for p in aktivitas_hari_ini %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ p.mahasiswa.nama }}</td>
+                        <td>{% if p.mahasiswa %}{{ p.mahasiswa.nama }}{% else %}-{% endif %}</td>
                         <td>{{ p.kunci.nomor_kunci|default:'-' }}</td>
-                        <td>{{ p.laboratorium.nama_lab }}</td>
+                        <td>{{ p.laboratorium.nama_lab|default:'-' }}</td>
                         <td>{{ p.jam_pinjam }}</td>
                         <td>
                             {% if p.status == 'Dipinjam' %}
@@ -76,7 +100,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center">Belum ada aktivitas</td>
+                        <td colspan="6" class="text-center">Belum ada aktivitas hari ini</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -84,4 +108,46 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const chartLabels = {{ chart_labels|safe }};
+    const chartSeri = {{ chart_seri|safe }};
+    const chartLabLabels = {{ chart_lab_labels|safe }};
+    const chartLabSeri = {{ chart_lab_seri|safe }};
+</script>
+<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
+<script>
+    if (typeof Chart !== 'undefined') {
+        new Chart(document.getElementById('chart-7hari'), {
+            type: 'bar',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Jumlah Peminjaman',
+                    data: chartSeri,
+                    backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                    borderColor: '#0d6efd',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+        new Chart(document.getElementById('chart-ruangan'), {
+            type: 'doughnut',
+            data: {
+                labels: chartLabLabels,
+                datasets: [{
+                    data: chartLabSeri,
+                    backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6f42c1', '#fd7e14', '#20c997']
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+</script>
 {% endblock %}
