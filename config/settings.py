@@ -133,6 +133,5 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL', 'True') == 'True'
 CORS_ALLOW_CREDENTIALS = True
 
-FCM_SERVICE_ACCOUNT_JSON = os.environ.get(
-    'FCM_SERVICE_ACCOUNT_JSON', BASE_DIR / 'serviceAccountKey.json'
-)
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')

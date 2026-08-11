@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../api/api_service.dart';
-import '../services/push_service.dart';
 import 'kunci_screen.dart';
 import 'notifikasi_screen.dart';
 
@@ -51,20 +50,6 @@ class _LogoutPage extends StatelessWidget {
   final VoidCallback onLogout;
   const _LogoutPage({required this.onLogout});
 
-  Future<void> _cobaAktifkan(BuildContext context) async {
-    final err = await PushService.registerDeviceToken();
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          err == null
-              ? 'Notifikasi push aktif.'
-              : 'Notifikasi push tidak aktif.\nDetail: $err',
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -74,14 +59,7 @@ class _LogoutPage extends StatelessWidget {
           const Text('Anda login sebagai penanggung jawab.'),
           const SizedBox(height: 16),
           FilledButton.tonalIcon(
-            onPressed: () => _cobaAktifkan(context),
-            icon: const Icon(Icons.notifications_active),
-            label: const Text('AKTIFKAN NOTIFIKASI'),
-          ),
-          const SizedBox(height: 8),
-          FilledButton.tonalIcon(
             onPressed: () async {
-              await PushService.unregisterDeviceToken();
               await ApiService.instance.logout();
               onLogout();
             },

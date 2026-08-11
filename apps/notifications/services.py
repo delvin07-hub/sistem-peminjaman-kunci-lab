@@ -1,100 +1,61 @@
+import json
 import logging
 import threading
+from urllib import error, request
 
 from django.conf import settings
 from django.db import transaction
 
 from apps.authentication.models import PenanggungJawab
 
-from .models import DeviceToken, Notifikasi
+from .models import Notifikasi
 
 logger = logging.getLogger(__name__)
 
-_firebase_app = None
 
-
-def _get_firebase_app():
-    """Inisialisasi firebase_admin satu kali; None jika key tidak tersedia."""
-    global _firebase_app
-    if _firebase_app is not None:
-        return _firebase_app
-    path = settings.FCM_SERVICE_ACCOUNT_JSON
-    if not path or not __import__('pathlib').Path(path).exists():
-        logger.warning(
-            'FCM_SERVICE_ACCOUNT_JSON tidak ditemukan (%s); push dinonaktifkan',
-            path,
-        )
-        _firebase_app = False
+def _telegram_config():
+    token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
+    chat_id = getattr(settings, 'TELEGRAM_CHAT_ID', '')
+    if not token or not chat_id:
+        logger.warning('Telegram belum dikonfigurasi; notifikasi dilewati')
         return None
-    import firebase_admin
-    from firebase_admin import credentials
+    return token, str(chat_id)
 
-    try:
-        _firebase_app = firebase_admin.initialize_app(
-            credentials.Certificate(str(path))
-        )
-    except Exception:
-        logger.exception('Gagal inisialisasi firebase_admin')
-        _firebase_app = False
-    return _firebase_app if _firebase_app else None
+
+def _kirim_telegram(token, chat_id, pesan):
+    url = f'https://api.telegram.org/bot{token}/sendMessage'
+    payload = json.dumps({
+        'chat_id': chat_id,
+        'text': pesan,
+        'disable_web_page_preview': True,
+    }).encode('utf-8')
+    req = request.Request(
+        url,
+        data=payload,
+        headers={'Content-Type': 'application/json'},
+        method='POST',
+    )
+    with request.urlopen(req, timeout=10) as resp:
+        body = json.loads(resp.read().decode('utf-8') or '{}')
+    if not body.get('ok'):
+        raise RuntimeError(body.get('description', 'Telegram error'))
 
 
 class PushNotifikasiService:
     @staticmethod
     def kirim(notifikasi):
-        app = _get_firebase_app()
-        if not app:
-            return
-        try:
-            from firebase_admin import messaging
-        except ImportError:
-            logger.warning('firebase-admin belum terinstall; push dilewati')
-            return
-        peminjaman = notifikasi.peminjaman
-        data = {
-            'notifikasi_id': str(notifikasi.id),
-            'tipe': notifikasi.tipe,
-            'peminjaman_id': str(peminjaman.id) if peminjaman else '',
-            'pesan': notifikasi.pesan,
-        }
-        token_ids = list(
-            notifikasi.penanggung_jawab.device_tokens.values_list(
-                'token', flat=True
-            )
-        )
-        if not token_ids:
+        config = _telegram_config()
+        if not config:
             Notifikasi.objects.filter(pk=notifikasi.pk).update(status='Gagal')
             return
-        berhasil = 0
-        for token in token_ids:
-            try:
-                messaging.send(
-                    messaging.Message(
-                        notification=messaging.Notification(
-                            title='Kunci Dipinjam'
-                            if notifikasi.tipe == 'Dipinjam'
-                            else 'Kunci Dikembalikan',
-                            body=notifikasi.pesan,
-                        ),
-                        data=data,
-                        token=token,
-                    )
-                )
-                berhasil += 1
-            except Exception as exc:
-                logger.warning(
-                    'Gagal kirim FCM ke token %s...: %s', token[:20], exc
-                )
-                from firebase_admin import exceptions as fb_exc
-                from firebase_admin import messaging as fcm
-
-                if isinstance(
-                    exc, (fcm.UnregisteredError, fb_exc.InvalidArgumentError)
-                ):
-                    DeviceToken.objects.filter(token=token).delete()
-                    logger.info('Device token kadaluarsa dihapus: %s...', token[:20])
-        new_status = 'Terkirim' if berhasil == len(token_ids) else 'Gagal'
-        Notifikasi.objects.filter(pk=notifikasi.pk).update(status=new_status)
+        token, chat_id = config
+        try:
+            _kirim_telegram(token, chat_id, notifikasi.pesan)
+        except (error.URLError, TimeoutError, ValueError, RuntimeError) as exc:
+            logger.warning('Gagal kirim Telegram: %s', exc)
+            Notifikasi.objects.filter(pk=notifikasi.pk).update(status='Gagal')
+            return
+        Notifikasi.objects.filter(pk=notifikasi.pk).update(status='Terkirim')
 
     @staticmethod
     def kirim_untuk_peminjaman(peminjaman_id, tipe):
@@ -105,13 +66,14 @@ class PushNotifikasiService:
                 PushNotifikasiService.kirim(notifikasi)
         except Exception:
             logger.exception(
-                'Gagal mengirim push untuk peminjaman %s (%s)',
-                peminjaman_id, tipe,
+                'Gagal mengirim notifikasi Telegram untuk peminjaman %s (%s)',
+                peminjaman_id,
+                tipe,
             )
 
 
 def _kirim_push_bg(peminjaman_id, tipe):
-    """Mulai pengiriman push FCM di thread latar belakang (daemon)."""
+    """Mulai pengiriman Telegram di thread latar belakang (daemon)."""
     threading.Thread(
         target=PushNotifikasiService.kirim_untuk_peminjaman,
         args=(peminjaman_id, tipe),
@@ -144,10 +106,11 @@ class NotifikasiService:
         lab_nama = lab.nama_lab if lab else '-'
         if tipe == 'Dipinjam':
             return (
-                f'{mhs_nama} meminjam kunci {nome}'
-                f' ({lab_nama}) jam {peminjaman.jam_pinjam}'
+                f'[PENANGGUNG JAWAB KUNCI]\n'
+                f'{mhs_nama} meminjam kunci {nome} ({lab_nama})\n'
+                f'Jam: {peminjaman.jam_pinjam}'
             )
         return (
-            f'{mhs_nama} mengembalikan kunci {nome}'
-            f' ({lab_nama})'
+            f'[PENANGGUNG JAWAB KUNCI]\n'
+            f'{mhs_nama} mengembalikan kunci {nome} ({lab_nama})'
         )

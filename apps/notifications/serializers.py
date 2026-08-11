@@ -4,7 +4,7 @@ from apps.authentication.models import PenanggungJawab
 from apps.master_data.models import Dosen, Kunci, Laboratorium, Mahasiswa
 from apps.transaction.models import Peminjaman
 
-from .models import DeviceToken, Notifikasi
+from .models import Notifikasi
 
 
 class MahasiswaDetailSerializer(serializers.ModelSerializer):
@@ -145,23 +145,6 @@ class KunciDetailEndpointSerializer(KunciStatusSerializer):
             .order_by('-created_at')[:10]
         )
         return KunciRiwayatSerializer(riwayat, many=True).data
-
-
-class DeviceTokenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DeviceToken
-        fields = ['id', 'token', 'created_at']
-        read_only_fields = ['id', 'created_at']
-
-    def create(self, validated_data):
-        pj = validated_data.pop('penanggung_jawab')
-        token = validated_data.pop('token')
-        obj, _ = DeviceToken.objects.update_or_create(
-            penanggung_jawab=pj,
-            token=token,
-            defaults=validated_data,
-        )
-        return obj
 
 
 class PenanggungJawabSerializer(serializers.ModelSerializer):

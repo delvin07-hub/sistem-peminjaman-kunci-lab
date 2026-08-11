@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../api/api_service.dart';
-import '../services/push_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback onLogin;
@@ -28,17 +27,6 @@ class _LoginScreenState extends State<LoginScreen> {
       await ApiService.instance.login(_username.text.trim(), _password.text);
       if (!mounted) return;
       widget.onLogin();
-      final err = await PushService.registerDeviceToken();
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            err == null
-                ? 'Login berhasil. Notifikasi aktif.'
-                : 'Notifikasi push tidak aktif.\nDetail: $err',
-          ),
-        ),
-      );
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _error = e.message);

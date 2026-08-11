@@ -2,7 +2,6 @@ from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
 
 from .views import (
-    DeviceTokenView,
     KunciStatusDetailView,
     KunciStatusListView,
     NotifikasiBacaView,
@@ -15,5 +14,4 @@ urlpatterns = [
     path('notifikasi/<int:pk>/baca/', NotifikasiBacaView.as_view(), name='api-notifikasi-baca'),
     path('status-kunci/', KunciStatusListView.as_view(), name='api-status-kunci'),
     path('status-kunci/<int:pk>/', KunciStatusDetailView.as_view(), name='api-status-kunci-detail'),
-    path('device-token/', DeviceTokenView.as_view(), name='api-device-token'),
 ]

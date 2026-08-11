@@ -1,12 +1,10 @@
-from rest_framework import generics, status
-from rest_framework.response import Response
+from rest_framework import generics
 
 from apps.master_data.models import Kunci
 
-from .models import DeviceToken, Notifikasi
+from .models import Notifikasi
 from .permissions import IsPenanggungJawab
 from .serializers import (
-    DeviceTokenSerializer,
     KunciDetailEndpointSerializer,
     KunciStatusSerializer,
     NotifikasiSerializer,
@@ -52,28 +50,3 @@ class KunciStatusDetailView(generics.RetrieveAPIView):
     permission_classes = [IsPenanggungJawab]
     serializer_class = KunciDetailEndpointSerializer
     queryset = Kunci.objects.select_related('laboratorium')
-
-
-class DeviceTokenView(generics.CreateAPIView):
-    permission_classes = [IsPenanggungJawab]
-    serializer_class = DeviceTokenSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(penanggung_jawab=self.request.user.penanggung_jawab)
-
-    def delete(self, request, *args, **kwargs):
-        token = request.data.get('token') or request.query_params.get('token')
-        if not token:
-            return Response(
-                {'detail': 'Token tidak diberikan.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        deleted, _ = DeviceToken.objects.filter(
-            penanggung_jawab__user=request.user, token=token
-        ).delete()
-        if not deleted:
-            return Response(
-                {'detail': 'Token tidak ditemukan.'},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        return Response(status=status.HTTP_204_NO_CONTENT)

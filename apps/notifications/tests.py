@@ -2,7 +2,6 @@ from datetime import time
 
 from django.contrib.auth.models import User
 from django.test import TestCase
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from apps.authentication.models import PenanggungJawab
@@ -80,7 +79,6 @@ class NotifikasiAPITest(TestCase):
         self.pj = PenanggungJawab.objects.create(
             user=self.user, nama_lengkap='PJ API'
         )
-        self.token = Token.objects.create(user=self.user)
         self.client = APIClient()
 
     def test_login_token(self):
@@ -94,7 +92,10 @@ class NotifikasiAPITest(TestCase):
         Notifikasi.objects.create(
             penanggung_jawab=self.pj, tipe='Dipinjam', pesan='x'
         )
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        token = self.client.post(
+            '/api/token/', {'username': 'pj_api', 'password': 'pw'}
+        ).data['token']
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
         response = self.client.get('/api/notifikasi/')
         self.assertEqual(response.status_code, 200)
         results = response.data.get('results', response.data)
@@ -104,7 +105,10 @@ class NotifikasiAPITest(TestCase):
         notif = Notifikasi.objects.create(
             penanggung_jawab=self.pj, tipe='Dipinjam', pesan='x'
         )
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        token = self.client.post(
+            '/api/token/', {'username': 'pj_api', 'password': 'pw'}
+        ).data['token']
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
         response = self.client.patch(
             f'/api/notifikasi/{notif.id}/baca/', {}, format='json'
         )
@@ -115,7 +119,10 @@ class NotifikasiAPITest(TestCase):
     def test_status_kunci(self):
         lab = Laboratorium.objects.create(kode_lab='LX', nama_lab='Lab X')
         Kunci.objects.create(laboratorium=lab, nomor_kunci='K9')
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        token = self.client.post(
+            '/api/token/', {'username': 'pj_api', 'password': 'pw'}
+        ).data['token']
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
         response = self.client.get('/api/status-kunci/')
         self.assertEqual(response.status_code, 200)
         results = response.data.get('results', response.data)
@@ -147,7 +154,10 @@ class NotifikasiAPITest(TestCase):
             tipe='Dipinjam',
             pesan='pesan',
         )
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        token = self.client.post(
+            '/api/token/', {'username': 'pj_api', 'password': 'pw'}
+        ).data['token']
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
         response = self.client.get('/api/notifikasi/')
         results = response.data.get('results', response.data)
         detail = results[0]['peminjaman_detail']
@@ -176,7 +186,10 @@ class NotifikasiAPITest(TestCase):
             keperluan='Praktikum',
             status='Dipinjam',
         )
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        token = self.client.post(
+            '/api/token/', {'username': 'pj_api', 'password': 'pw'}
+        ).data['token']
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
         response = self.client.get('/api/status-kunci/')
         results = response.data.get('results', response.data)
         aktif = next(r for r in results if r['id'] == kunci.id)
@@ -202,7 +215,10 @@ class NotifikasiAPITest(TestCase):
             keperluan='Riset',
             status='Dipinjam',
         )
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        token = self.client.post(
+            '/api/token/', {'username': 'pj_api', 'password': 'pw'}
+        ).data['token']
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
         response = self.client.get(f'/api/status-kunci/{kunci.id}/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['nomor_kunci'], 'K4')
@@ -210,98 +226,7 @@ class NotifikasiAPITest(TestCase):
         self.assertEqual(
             response.data['riwayat'][0]['mahasiswa']['nim'], '2200003'
         )
-
-    def test_device_token_register_dan_delete(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
-        response = self.client.post(
-            '/api/device-token/',
-            {'token': 'fcm-token-abc'},
-            format='json',
-        )
-        self.assertEqual(response.status_code, 201)
-        from .models import DeviceToken
-
-        dt = DeviceToken.objects.get(token='fcm-token-abc')
-        self.assertEqual(dt.penanggung_jawab, self.pj)
-
-        response = self.client.delete(
-            '/api/device-token/', {'token': 'fcm-token-abc'}, format='json'
-        )
-        self.assertEqual(response.status_code, 204)
-        self.assertFalse(DeviceToken.objects.filter(pk=dt.pk).exists())
-
-    def test_device_token_milik_orang_lain_tidak_bisa_dihapus(self):
-        from .models import DeviceToken
-
-        other_user = User.objects.create_user('pj_lain', password='x')
-        other_pj = PenanggungJawab.objects.create(
-            user=other_user, nama_lengkap='PJ Lain'
-        )
-        DeviceToken.objects.create(
-            penanggung_jawab=other_pj, token='fcm-token-lain'
-        )
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
-        response = self.client.delete(
-            '/api/device-token/', {'token': 'fcm-token-lain'}, format='json'
-        )
-        self.assertEqual(response.status_code, 404)
-
-
-class PushNotifikasiServiceTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user('pjs', password='x')
-        self.pj = PenanggungJawab.objects.create(
-            user=self.user, nama_lengkap='PJ Push', aktif=True
-        )
-
-    def test_push_tanpa_key_file_tidak_error(self):
-        from unittest import mock
-
-        from .models import DeviceToken, Notifikasi
-        from .services import PushNotifikasiService
-
-        DeviceToken.objects.create(
-            penanggung_jawab=self.pj, token='fcm-token-1'
-        )
-        notif = Notifikasi.objects.create(
-            penanggung_jawab=self.pj, tipe='Dipinjam', pesan='pesan'
-        )
-        with mock.patch(
-            'apps.notifications.services._get_firebase_app',
-            return_value=mock.Mock(),
-        ):
-            try:
-                PushNotifikasiService.kirim(notif)
-            except Exception as exc:  # pragma: no cover
-                self.fail(f'kirim melempar exception: {exc}')
-
-    def test_token_kadaluarsa_dihapus_saat_kirim_gagal(self):
-        from unittest import mock
-
-        from firebase_admin import exceptions as fb_exc
-
-        from .models import DeviceToken, Notifikasi
-        from .services import PushNotifikasiService
-
-        DeviceToken.objects.create(
-            penanggung_jawab=self.pj, token='fcm-token-dead'
-        )
-        notif = Notifikasi.objects.create(
-            penanggung_jawab=self.pj, tipe='Dipinjam', pesan='pesan'
-        )
-        with mock.patch(
-            'apps.notifications.services._get_firebase_app',
-            return_value=mock.Mock(),
-        ), mock.patch(
-            'firebase_admin.messaging.send',
-            side_effect=fb_exc.InvalidArgumentError('token tidak valid'),
-        ):
-            PushNotifikasiService.kirim(notif)
-        self.assertFalse(
-            DeviceToken.objects.filter(token='fcm-token-dead').exists()
-        )
-
-def test_hook_buat_tidak_error_tanpa_key(self):
+    def test_hook_buat_tidak_error_tanpa_config(self):
         mhs = Mahasiswa.objects.create(
             nim='2200004', nama='Eka', program_studi='TI'
         )
@@ -317,7 +242,7 @@ def test_hook_buat_tidak_error_tanpa_key(self):
             keperluan='Praktikum',
         )
         try:
-            with self.settings(FCM_SERVICE_ACCOUNT_JSON=''):
+            with self.settings(TELEGRAM_BOT_TOKEN='', TELEGRAM_CHAT_ID=''):
                 NotifikasiService.buat(peminjaman, 'Dipinjam')
         except Exception as exc:  # pragma: no cover
             self.fail(f'buat melempar exception: {exc}')
