@@ -104,13 +104,36 @@ class NotifikasiService:
         mhs = peminjaman.mahasiswa
         mhs_nama = mhs.nama if mhs else '-'
         lab_nama = lab.nama_lab if lab else '-'
+        jam = getattr(peminjaman, 'jam_pinjam', None) or getattr(
+            peminjaman, 'jam_kembali', None
+        )
+        jam_str = str(jam) if jam else '-'
+        try:
+            from django.utils import timezone
+            today = timezone.localdate()
+        except Exception:
+            today = None
+        today_str = today.strftime('%d %b %Y') if today else ''
+
         if tipe == 'Dipinjam':
             return (
-                f'[PENANGGUNG JAWAB KUNCI]\n'
-                f'{mhs_nama} meminjam kunci {nome} ({lab_nama})\n'
-                f'Jam: {peminjaman.jam_pinjam}'
+                '🔑 PEMINJAMAN KUNCI\n'
+                f'━━━━━━━━━━━━━━\n'
+                f'Nama    : {mhs_nama}\n'
+                f'Kunci   : {nome}\n'
+                f'Lab     : {lab_nama}\n'
+                f'Jam     : {jam_str}\n'
+                f'Perlu   : {peminjaman.keperluan or "-"}\n'
+                f'━━━━━━━━━━━━━━\n'
+                f'⏰ {today_str}'
             )
         return (
-            f'[PENANGGUNG JAWAB KUNCI]\n'
-            f'{mhs_nama} mengembalikan kunci {nome} ({lab_nama})'
+            '🔓 PENGEMBALIAN KUNCI\n'
+            f'━━━━━━━━━━━━━━\n'
+            f'Nama    : {mhs_nama}\n'
+            f'Kunci   : {nome}\n'
+            f'Lab     : {lab_nama}\n'
+            f'Jam     : {jam_str}\n'
+            f'━━━━━━━━━━━━━━\n'
+            '✅ Terima kasih sudah mengembalikan'
         )
