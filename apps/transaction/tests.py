@@ -210,3 +210,59 @@ class KunciRuanganValidasiTest(TestCase):
         response = self._post_form(self.lab_a, self.kunci_a)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Peminjaman.objects.filter(mahasiswa=self.mahasiswa).exists())
+
+
+class PeminjamanGandaTest(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_superuser('root', 'r@x.com', 'pw')
+        self.client.force_login(self.admin)
+        self.lab = Laboratorium.objects.create(kode_lab='LG', nama_lab='Lab Ganda')
+        self.mahasiswa = Mahasiswa.objects.create(
+            nim='2209010', nama='Eko Test', program_studi='TI'
+        )
+        self.dosen = Dosen.objects.create(nidn='ND10', nama='Dosen E')
+        self.kunci_a = Kunci.objects.create(
+            laboratorium=self.lab, nomor_kunci='KA', status='Tersedia'
+        )
+        self.kunci_b = Kunci.objects.create(
+            laboratorium=self.lab, nomor_kunci='KB', status='Tersedia'
+        )
+        # Buat peminjaman aktif untuk mahasiswa ini
+        Peminjaman.objects.create(
+            mahasiswa=self.mahasiswa,
+            dosen=self.dosen,
+            laboratorium=self.lab,
+            kunci=self.kunci_a,
+            jam_pinjam=time(8, 0),
+            keperluan='Praktikum',
+            status='Dipinjam',
+        )
+
+    def _post_form(self, kunci_id):
+        return self.client.post(reverse('peminjaman_create'), {
+            'mahasiswa': self.mahasiswa.id,
+            'dosen': self.dosen.id,
+            'laboratorium': self.lab.id,
+            'kunci': kunci_id,
+            'keperluan': 'Praktikum',
+        })
+
+    def test_blokir_peminjaman_ganda_mahasiswa(self):
+        response = self._post_form(self.kunci_b.id)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Mahasiswa ini masih meminjam kunci KA (Lab Ganda). Harap kembalikan terlebih dahulu.',
+        )
+        # Total peminjaman tetap 1
+        self.assertEqual(Peminjaman.objects.filter(mahasiswa=self.mahasiswa).count(), 1)
+
+    def test_tetap_bisa_pinjam_setelah_kembali(self):
+        PeminjamanService.kembalikan_kunci(
+            Peminjaman.objects.filter(mahasiswa=self.mahasiswa).first().id
+        )
+        response = self._post_form(self.kunci_b.id)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            Peminjaman.objects.filter(mahasiswa=self.mahasiswa).count(), 2
+        )

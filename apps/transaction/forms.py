@@ -34,4 +34,16 @@ class PeminjamanForm(forms.ModelForm):
             self.add_error(
                 'kunci', 'Kunci tidak sesuai dengan ruangan yang dipilih.'
             )
+        mhs = cleaned.get('mahasiswa')
+        if mhs and Peminjaman.objects.filter(
+            mahasiswa=mhs, status='Dipinjam'
+        ).exists():
+            aktif = Peminjaman.objects.filter(
+                mahasiswa=mhs, status='Dipinjam'
+            ).select_related('kunci', 'laboratorium').first()
+            self.add_error(
+                'mahasiswa',
+                f'Mahasiswa ini masih meminjam kunci {aktif.kunci.nomor_kunci} '
+                f'({aktif.laboratorium.nama_lab}). Harap kembalikan terlebih dahulu.',
+            )
         return cleaned

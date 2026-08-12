@@ -19,6 +19,17 @@ class PeminjamanService:
             )
         if kunci.status != 'Tersedia':
             raise ValueError(f"Kunci {kunci.nomor_kunci} sedang dipinjam")
+        mhs = data.get('mahasiswa')
+        if mhs and Peminjaman.objects.filter(
+            mahasiswa=mhs, status='Dipinjam'
+        ).exclude(kunci=kunci).exists():
+            aktif = Peminjaman.objects.filter(
+                mahasiswa=mhs, status='Dipinjam'
+            ).exclude(kunci=kunci).first()
+            raise ValueError(
+                f'Mahasiswa {mhs.nama} masih meminjam kunci {aktif.kunci.nomor_kunci} '
+                f'({aktif.laboratorium.nama_lab}). Harap kembalikan terlebih dahulu.'
+            )
         now = timezone.localtime()
         peminjaman = Peminjaman.objects.create(
             **data,
