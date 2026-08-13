@@ -213,6 +213,14 @@ Tahapan perancangan yang dilakukan pada proyek ini sesuai dengan metode Waterfal
 
 2. **Desain Sistem** — Perancangan arsitektur sistem, struktur database (ERD), antarmuka pengguna, serta alur proses peminjaman dan pengembalian. Desain mencakup halaman dashboard, form peminjaman, halaman pengembalian, riwayat, laporan, dan modul notifikasi.
 
+![Gambar 3.1 Use Case Diagram](images/usecase.png)
+
+Gambar 3.1 Use Case Diagram — menggambarkan interaksi antara Admin/Laboran dengan fungsi-fungsi utama sistem (login, dashboard, kelola data master, peminjaman, pengembalian, riwayat & laporan, notifikasi Telegram).
+
+![Gambar 3.2 Entity Relationship Diagram (ERD)](images/erd.png)
+
+Gambar 3.2 ERD — menggambarkan hubungan antar entitas: Mahasiswa, Dosen, Laboratorium, Kunci, dan Peminjaman (relasi one-to-many).
+
 3. **Implementasi** — Implementasi menggunakan Python Django untuk backend, Bootstrap 5 dan htmx untuk frontend, serta Flutter untuk aplikasi mobile. Integrasi notifikasi dilakukan menggunakan Telegram Bot API.
 
 4. **Pengujian** — Pengujian otomatis menggunakan Django Test Framework (56 kasus uji) dan pengujian langsung oleh pengguna (black box testing).
