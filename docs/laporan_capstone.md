@@ -245,6 +245,14 @@ Implementasi sistem dilakukan sesuai dengan desain yang telah dibuat. Fitur-fitu
 
 9. **Aplikasi Mobile** — Aplikasi Flutter pendamping untuk pemantauan status kunci dan notifikasi.
 
+![Gambar 3.3 Activity Diagram — Alur Peminjaman Kunci](images/activity.png)
+
+Gambar 3.3 Activity Diagram — menggambarkan alur kerja utama sistem mulai dari login, pemilihan transaksi (peminjaman/pengembalian), validasi ketersediaan kunci, penyimpanan transaksi, hingga pengiriman notifikasi Telegram.
+
+![Gambar 3.4 Sequence Diagram — Proses Peminjaman Kunci](images/sequence.png)
+
+Gambar 3.4 Sequence Diagram — menggambarkan interaksi berurutan antara Admin, Form, System, Database, dan Telegram Bot saat proses peminjaman kunci berlangsung, mulai dari input data hingga pengiriman notifikasi.
+
 **B. Pengujian Program**
 
 Pengujian dilakukan menggunakan Django Test Framework. Total 56 kasus uji berhasil (OK). Beberapa kasus uji utama:
